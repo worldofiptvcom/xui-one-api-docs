@@ -5,15 +5,16 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="description" content="XUI.ONE Admin API Documentation - Interactive Swagger UI" />
   <title>XUI.ONE Admin API Documentation</title>
-  <link rel="stylesheet" href="https://unpkg.com/swagger-ui-dist@5.9.0/swagger-ui.css" />
+  <link rel="stylesheet" href="https://unpkg.com/swagger-ui-dist@5.11.0/swagger-ui.css" />
   <style>
     body {
       margin: 0;
       padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
     }
     
     .topbar {
-      display: none;
+      display: none !important;
     }
     
     .swagger-ui .info {
@@ -78,6 +79,18 @@
     .info-banner strong {
       color: #856404;
     }
+    
+    #swagger-ui {
+      max-width: 1460px;
+      margin: 0 auto;
+    }
+    
+    .loading-message {
+      text-align: center;
+      padding: 40px;
+      font-size: 18px;
+      color: #666;
+    }
   </style>
 </head>
 <body>
@@ -96,52 +109,9 @@
     Replace placeholder values (<code>your-server.com</code>, <code>&lt;API-KEY&gt;</code>, <code>&lt;Access-Code&gt;</code>) with your actual credentials.
   </div>
   
-  <div id="swagger-ui"></div>
-  
-  <script src="https://unpkg.com/swagger-ui-dist@5.9.0/swagger-ui-bundle.js" crossorigin></script>
-  <script src="https://unpkg.com/swagger-ui-dist@5.9.0/swagger-ui-standalone-preset.js" crossorigin></script>
-  <script>
-    window.onload = () => {
-      window.ui = SwaggerUIBundle({
-        url: './openapi.yaml',
-        dom_id: '#swagger-ui',
-        deepLinking: true,
-        presets: [
-          SwaggerUIBundle.presets.apis,
-          SwaggerUIStandalonePreset
-        ],
-        plugins: [
-          SwaggerUIBundle.plugins.DownloadUrl
-        ],
-        layout: "StandaloneLayout",
-        defaultModelsExpandDepth: 1,
-        defaultModelExpandDepth: 1,
-        docExpansion: 'list',
-        filter: true,
-        showRequestHeaders: true,
-        tryItOutEnabled: true,
-        requestSnippetsEnabled: true,
-        requestSnippets: {
-          generators: {
-            curl_bash: {
-              title: "cURL (bash)",
-              syntax: "bash"
-            },
-            curl_powershell: {
-              title: "cURL (PowerShell)",
-              syntax: "powershell"
-            },
-            curl_cmd: {
-              title: "cURL (CMD)",
-              syntax: "bash"
-            }
-          },
-          defaultExpanded: true,
-          languages: null
-        }
-      });
-    };
-  </script>
+  <div id="swagger-ui">
+    <div class="loading-message">⏳ Loading API Documentation...</div>
+  </div>
   
   <footer style="text-align: center; padding: 40px 20px; background: #fafafa; margin-top: 50px; border-top: 1px solid #e5e5e5;">
     <p style="color: #666; margin: 0;">
@@ -154,5 +124,57 @@
       Documentation licensed under MIT | XUI.ONE software is proprietary
     </p>
   </footer>
+  
+  <script src="https://unpkg.com/swagger-ui-dist@5.11.0/swagger-ui-bundle.js" crossorigin></script>
+  <script src="https://unpkg.com/swagger-ui-dist@5.11.0/swagger-ui-standalone-preset.js" crossorigin></script>
+  <script>
+    window.onload = function() {
+      try {
+        window.ui = SwaggerUIBundle({
+          url: 'openapi.yaml',
+          dom_id: '#swagger-ui',
+          deepLinking: true,
+          presets: [
+            SwaggerUIBundle.presets.apis,
+            SwaggerUIStandalonePreset
+          ],
+          plugins: [
+            SwaggerUIBundle.plugins.DownloadUrl
+          ],
+          layout: "StandaloneLayout",
+          defaultModelsExpandDepth: 1,
+          defaultModelExpandDepth: 1,
+          docExpansion: 'list',
+          filter: true,
+          showRequestHeaders: true,
+          tryItOutEnabled: true,
+          requestSnippetsEnabled: true,
+          supportedSubmitMethods: ['get', 'post', 'put', 'delete', 'patch'],
+          validatorUrl: null,
+          onComplete: function() {
+            console.log('✅ Swagger UI loaded successfully!');
+          },
+          onFailure: function(error) {
+            console.error('❌ Swagger UI failed to load:', error);
+            document.getElementById('swagger-ui').innerHTML = 
+              '<div style="padding: 40px; text-align: center; color: #d32f2f;">' +
+              '<h2>⚠️ Failed to Load API Documentation</h2>' +
+              '<p>Error: ' + error.message + '</p>' +
+              '<p>Please check the browser console for more details.</p>' +
+              '<p><a href="openapi.yaml" target="_blank">View raw OpenAPI spec</a></p>' +
+              '</div>';
+          }
+        });
+      } catch (error) {
+        console.error('❌ Error initializing Swagger UI:', error);
+        document.getElementById('swagger-ui').innerHTML = 
+          '<div style="padding: 40px; text-align: center; color: #d32f2f;">' +
+          '<h2>⚠️ Failed to Initialize Swagger UI</h2>' +
+          '<p>Error: ' + error.message + '</p>' +
+          '<p><a href="openapi.yaml" target="_blank">View raw OpenAPI spec</a></p>' +
+          '</div>';
+      }
+    };
+  </script>
 </body>
 </html>
