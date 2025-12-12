@@ -758,6 +758,551 @@ paths:
         '401':
           $ref: '#/components/responses/Unauthorized'
 
+  /?action=get_line:
+    get:
+      summary: Get Specific Line Details
+      description: |
+        Retrieves detailed information about a specific subscription line by ID.
+        
+        **Purpose:** View detailed information for a single line.
+        
+        ---
+        
+        **Example Request:**
+        ```bash
+        curl "http://your-server.com/cSbuFLhp/?api_key=8D3135D30437F86EAE2FA4A2A8345000&action=get_line&id=123"
+        ```
+        
+        **Use Cases:**
+        - ✅ View specific line details
+        - ✅ Check line status before editing
+        - ✅ Verify line configuration
+        - ✅ Audit line settings
+      operationId: getLine
+      tags:
+        - Line API
+      parameters:
+        - $ref: '#/components/parameters/ApiKey'
+        - name: action
+          in: query
+          required: true
+          schema:
+            type: string
+            enum: [get_line]
+        - name: id
+          in: query
+          required: true
+          description: Line ID
+          schema:
+            type: integer
+          example: 123
+      responses:
+        '200':
+          description: Line details retrieved successfully
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/SuccessResponse'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/Line'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /?action=create_line:
+    post:
+      summary: Create New Subscription Line
+      description: |
+        Creates a new subscription line (M3U/Xtream Codes account).
+        
+        **Purpose:** Add new subscriptions to your panel.
+        
+        ---
+        
+        **Example Request:**
+        ```bash
+        curl -X POST "http://your-server.com/cSbuFLhp/?api_key=8D3135D30437F86EAE2FA4A2A8345000&action=create_line" \
+          -d "username=newuser" \
+          -d "password=newpass123" \
+          -d "max_connections=1" \
+          -d "exp_date=2025-12-31" \
+          -d "bouquets_selected[]=1" \
+          -d "bouquets_selected[]=2"
+        ```
+        
+        **Response Example:**
+        ```json
+        {
+          "status": "STATUS_SUCCESS",
+          "data": {
+            "line_id": "456",
+            "username": "newuser",
+            "password": "newpass123"
+          }
+        }
+        ```
+        
+        **Use Cases:**
+        - ✅ Create new subscriptions
+        - ✅ Add trial accounts
+        - ✅ Set up reseller lines
+        - ✅ Bulk create accounts
+      operationId: createLine
+      tags:
+        - Line API
+      parameters:
+        - $ref: '#/components/parameters/ApiKey'
+        - name: action
+          in: query
+          required: true
+          schema:
+            type: string
+            enum: [create_line]
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              required:
+                - username
+                - password
+              properties:
+                username:
+                  type: string
+                  description: Username for the line
+                  example: "newuser"
+                password:
+                  type: string
+                  description: Password for the line
+                  example: "newpass123"
+                max_connections:
+                  type: integer
+                  description: Maximum concurrent connections
+                  default: 1
+                  example: 1
+                exp_date:
+                  type: string
+                  description: Expiration date (YYYY-MM-DD, Unix timestamp, or relative like "1month", "1year")
+                  example: "2025-12-31"
+                is_trial:
+                  type: integer
+                  description: Trial account (0 = No, 1 = Yes)
+                  enum: [0, 1]
+                  default: 0
+                  example: 0
+                is_restreamer:
+                  type: integer
+                  description: Reseller status (0 = No, 1 = Yes)
+                  enum: [0, 1]
+                  default: 0
+                  example: 0
+                bouquets_selected:
+                  type: array
+                  description: Array of bouquet/package IDs to assign
+                  items:
+                    type: integer
+                  example: [1, 2, 3]
+                notes:
+                  type: string
+                  description: Admin notes
+                  example: "Premium customer"
+                contact:
+                  type: string
+                  description: Contact information
+                  example: "customer@example.com"
+                isp_lock:
+                  type: string
+                  description: Lock to specific IP address
+                  example: "192.168.1.100"
+      responses:
+        '200':
+          description: Line created successfully
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/SuccessResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /?action=edit_line:
+    post:
+      summary: Edit Existing Line
+      description: |
+        Modifies an existing subscription line.
+        
+        **Purpose:** Update line settings and configuration.
+        
+        ---
+        
+        **Example Request:**
+        ```bash
+        curl -X POST "http://your-server.com/cSbuFLhp/?api_key=8D3135D30437F86EAE2FA4A2A8345000&action=edit_line" \
+          -d "id=123" \
+          -d "password=newpassword" \
+          -d "max_connections=2"
+        ```
+        
+        **Use Cases:**
+        - ✅ Change passwords
+        - ✅ Update connection limits
+        - ✅ Modify expiration dates
+        - ✅ Change assigned packages
+        - ✅ Update notes
+      operationId: editLine
+      tags:
+        - Line API
+      parameters:
+        - $ref: '#/components/parameters/ApiKey'
+        - name: action
+          in: query
+          required: true
+          schema:
+            type: string
+            enum: [edit_line]
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              required:
+                - id
+              properties:
+                id:
+                  type: integer
+                  description: Line ID to edit
+                  example: 123
+                username:
+                  type: string
+                  description: New username
+                  example: "updateduser"
+                password:
+                  type: string
+                  description: New password
+                  example: "newpass456"
+                max_connections:
+                  type: integer
+                  description: Maximum concurrent connections
+                  example: 2
+                exp_date:
+                  type: string
+                  description: New expiration date
+                  example: "2026-12-31"
+                is_trial:
+                  type: integer
+                  description: Trial status
+                  enum: [0, 1]
+                  example: 0
+                bouquets_selected:
+                  type: array
+                  description: Updated bouquet IDs
+                  items:
+                    type: integer
+                  example: [1, 2, 3, 4]
+                notes:
+                  type: string
+                  description: Updated notes
+                  example: "Extended subscription"
+      responses:
+        '200':
+          description: Line updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /?action=delete_line:
+    post:
+      summary: Delete Line
+      description: |
+        Permanently deletes a subscription line.
+        
+        **Purpose:** Remove lines from the panel.
+        
+        ⚠️ **Warning:** This action cannot be undone!
+        
+        ---
+        
+        **Example Request:**
+        ```bash
+        curl -X POST "http://your-server.com/cSbuFLhp/?api_key=8D3135D30437F86EAE2FA4A2A8345000&action=delete_line" \
+          -d "id=123"
+        ```
+        
+        **Use Cases:**
+        - ✅ Remove expired subscriptions
+        - ✅ Delete test accounts
+        - ✅ Clean up old lines
+      operationId: deleteLine
+      tags:
+        - Line API
+      parameters:
+        - $ref: '#/components/parameters/ApiKey'
+        - name: action
+          in: query
+          required: true
+          schema:
+            type: string
+            enum: [delete_line]
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              required:
+                - id
+              properties:
+                id:
+                  type: integer
+                  description: Line ID to delete
+                  example: 123
+      responses:
+        '200':
+          description: Line deleted successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /?action=enable_line:
+    post:
+      summary: Enable Line
+      description: |
+        Enables a disabled subscription line.
+        
+        **Purpose:** Reactivate suspended lines.
+        
+        ---
+        
+        **Example Request:**
+        ```bash
+        curl -X POST "http://your-server.com/cSbuFLhp/?api_key=8D3135D30437F86EAE2FA4A2A8345000&action=enable_line" \
+          -d "id=123"
+        ```
+        
+        **Use Cases:**
+        - ✅ Reactivate suspended accounts
+        - ✅ Resume service after payment
+        - ✅ Restore access
+      operationId: enableLine
+      tags:
+        - Line API
+      parameters:
+        - $ref: '#/components/parameters/ApiKey'
+        - name: action
+          in: query
+          required: true
+          schema:
+            type: string
+            enum: [enable_line]
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              required:
+                - id
+              properties:
+                id:
+                  type: integer
+                  description: Line ID to enable
+                  example: 123
+      responses:
+        '200':
+          description: Line enabled successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /?action=disable_line:
+    post:
+      summary: Disable Line
+      description: |
+        Disables an active subscription line without deleting it.
+        
+        **Purpose:** Temporarily suspend access.
+        
+        ---
+        
+        **Example Request:**
+        ```bash
+        curl -X POST "http://your-server.com/cSbuFLhp/?api_key=8D3135D30437F86EAE2FA4A2A8345000&action=disable_line" \
+          -d "id=123"
+        ```
+        
+        **Use Cases:**
+        - ✅ Suspend non-payment accounts
+        - ✅ Temporarily block access
+        - ✅ Pause service
+      operationId: disableLine
+      tags:
+        - Line API
+      parameters:
+        - $ref: '#/components/parameters/ApiKey'
+        - name: action
+          in: query
+          required: true
+          schema:
+            type: string
+            enum: [disable_line]
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              required:
+                - id
+              properties:
+                id:
+                  type: integer
+                  description: Line ID to disable
+                  example: 123
+      responses:
+        '200':
+          description: Line disabled successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /?action=ban_line:
+    post:
+      summary: Ban Line
+      description: |
+        Bans a subscription line, blocking access and preventing reactivation.
+        
+        **Purpose:** Permanently block abusive or fraudulent accounts.
+        
+        ---
+        
+        **Example Request:**
+        ```bash
+        curl -X POST "http://your-server.com/cSbuFLhp/?api_key=8D3135D30437F86EAE2FA4A2A8345000&action=ban_line" \
+          -d "id=123"
+        ```
+        
+        **Use Cases:**
+        - ✅ Block fraudulent accounts
+        - ✅ Prevent abuse
+        - ✅ Enforce terms of service
+      operationId: banLine
+      tags:
+        - Line API
+      parameters:
+        - $ref: '#/components/parameters/ApiKey'
+        - name: action
+          in: query
+          required: true
+          schema:
+            type: string
+            enum: [ban_line]
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              required:
+                - id
+              properties:
+                id:
+                  type: integer
+                  description: Line ID to ban
+                  example: 123
+      responses:
+        '200':
+          description: Line banned successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /?action=unban_line:
+    post:
+      summary: Unban Line
+      description: |
+        Removes ban from a previously banned line.
+        
+        **Purpose:** Restore access to banned accounts.
+        
+        ---
+        
+        **Example Request:**
+        ```bash
+        curl -X POST "http://your-server.com/cSbuFLhp/?api_key=8D3135D30437F86EAE2FA4A2A8345000&action=unban_line" \
+          -d "id=123"
+        ```
+        
+        **Use Cases:**
+        - ✅ Unban false positives
+        - ✅ Restore access after appeal
+        - ✅ Second chances
+      operationId: unbanLine
+      tags:
+        - Line API
+      parameters:
+        - $ref: '#/components/parameters/ApiKey'
+        - name: action
+          in: query
+          required: true
+          schema:
+            type: string
+            enum: [unban_line]
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              required:
+                - id
+              properties:
+                id:
+                  type: integer
+                  description: Line ID to unban
+                  example: 123
+      responses:
+        '200':
+          description: Line unbanned successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
 components:
   securitySchemes:
     ApiKeyAuth:
