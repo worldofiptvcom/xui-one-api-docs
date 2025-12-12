@@ -2,186 +2,98 @@ openapi: 3.0.3
 info:
   title: XUI.ONE Admin API
   description: |
-    # XUI.ONE Admin API Documentation
+    **Comprehensive API documentation for XUI.ONE IPTV Panel Administration**
     
-    Comprehensive API documentation for XUI.ONE IPTV Panel Administration.
+    ### 🎯 Quick Start
     
-    ## Overview
+    This API provides programmatic access to manage your IPTV platform with 180+ endpoints for:
+    - 📺 Manage subscriptions (Lines, MAG, Enigma2 devices)
+    - 🎬 Control streams, channels, movies, and series  
+    - 📊 Monitor connections and activity logs
+    - ⚙️ Configure servers and load balancers
     
-    The XUI.ONE Admin API provides programmatic access to manage your IPTV platform. With over 180+ endpoints, you can:
+    ---
     
-    - Manage subscriptions (Lines, MAG devices, Enigma2 devices)
-    - Control streams, channels, movies, and series
-    - Monitor connections and logs
-    - Configure servers and load balancers
-    - Administer users and resellers
-    
-    ## Base URL Structure
-    
-    All API requests follow this pattern:
+    ### 🔗 Base URL Pattern
     
     ```
-    http://YOUR_SERVER:PORT/<Access-Code>/?api_key=<API-KEY>&action=ACTION_NAME
+    http://YOUR_SERVER/<Access-Code>/?api_key=<API-KEY>&action=ACTION
     ```
     
-    **Components:**
-    - `YOUR_SERVER` - Your XUI.ONE server IP or domain
-    - `PORT` - API port (default: 80 for HTTP, 8000 for HTTP explicit, 9000 for HTTPS)
-    - `<Access-Code>` - Unique access code for API access
-    - `<API-KEY>` - Your generated API key
-    - `ACTION_NAME` - The API action to perform
+    **Replace:**
+    - `YOUR_SERVER` → Your server domain/IP
+    - `<Access-Code>` → Your access code (e.g., `cSbuFLhp`)
+    - `<API-KEY>` → Your API key
+    - `ACTION` → API action name (e.g., `get_lines`)
     
-    ## Authentication
+    ---
     
-    XUI.ONE API uses **API Key authentication** combined with **Access Codes** for secure access.
+    ### 🔐 Authentication Setup
     
-    ### Prerequisites
+    **Required:**
+    1. XUI.ONE panel installed (v1.5.5+)
+    2. Admin API access code created
+    3. API key generated from profile
     
-    Before using the API, you need:
+    **Quick Setup:**
+    1. Panel → Management → Access Control → Access Codes
+    2. Create "Admin API" access code
+    3. Profile → Generate API Key
+    4. Test: `curl "http://your-server.com/<Access-Code>/?api_key=<API-KEY>&action=user_info"`
     
-    1. ✅ XUI.ONE panel installed and running
-    2. ✅ Admin account with appropriate permissions
-    3. ✅ Admin API access code created
-    4. ✅ API key generated
+    📖 **[View detailed setup guide →](https://github.com/worldofiptvcom/xui-one-api-docs/blob/main/docs/getting-started.md)**
     
-    ### Step 1: Create Admin API Access Code
+    ---
     
-    1. Log into your XUI.ONE admin panel
-    2. Navigate to **Management → Access Control → Access Codes**
-    3. Click **Add Access Code**
-    4. Select **Access Type: Admin API**
-    5. Assign to **Administrators** group
-    6. (Optional) Restrict to specific IP address for security
-    7. Save the access code (e.g., `cSbuFLhp`)
+    ### 📝 Request Methods
     
-    ### Step 2: Generate API Key
-    
-    1. Log into admin panel
-    2. Click your profile (top right)
-    3. Select **Edit Profile**
-    4. Click the blue **Generate API Key** button
-    5. Copy and save your API key (e.g., `8D3135D30437F86EAE2FA4A2A8345000`)
-    
-    ⚠️ **Security Warning:** Keep your API key secure. If compromised, regenerate immediately.
-    
-    ### Step 3: Test Authentication
-    
-    Test your credentials with a simple API call:
-    
-    ```bash
-    curl "http://your-server.com/cSbuFLhp/?api_key=8D3135D30437F86EAE2FA4A2A8345000&action=user_info"
+    **GET** - Query data
+    ```
+    /?api_key=<API-KEY>&action=get_lines
     ```
     
-    Successful response:
+    **POST** - Create/update data  
+    ```
+    curl -X POST ".../?api_key=<API-KEY>&action=create_line" -d "username=test"
+    ```
+    
+    ---
+    
+    ### ✅ Response Format
+    
+    **Success:**
     ```json
     {
       "status": "STATUS_SUCCESS",
-      "data": {
-        "username": "admin",
-        "member_group_id": "1",
-        ...
-      }
+      "data": { ... }
     }
     ```
     
-    ## Request Methods
-    
-    The API supports both **GET** and **POST** methods:
-    
-    ### GET Requests
-    
-    Pass parameters in the URL query string:
-    
-    ```
-    http://your-server.com/cSbuFLhp/?api_key=8D3135D30437F86EAE2FA4A2A8345000&action=get_lines&limit=10
-    ```
-    
-    ### POST Requests
-    
-    Send parameters as form data or JSON in request body:
-    
-    ```bash
-    curl -X POST "http://your-server.com/cSbuFLhp/?api_key=8D3135D30437F86EAE2FA4A2A8345000&action=create_line" \
-      -d "username=testuser" \
-      -d "password=testpass" \
-      -d "max_connections=1"
-    ```
-    
-    ## Response Format
-    
-    All API responses return JSON with a consistent structure:
-    
-    ### Success Response
-    
-    ```json
-    {
-      "status": "STATUS_SUCCESS",
-      "data": {
-        // Response data here
-      }
-    }
-    ```
-    
-    ### Error Response
-    
+    **Error:**
     ```json
     {
       "status": "STATUS_FAILURE",
-      "error": "Error message description"
+      "error": "Error description"
     }
     ```
     
-    ## Common Error Messages
+    ---
     
-    | Error Message | Cause | Solution |
-    |--------------|-------|----------|
-    | `Invalid API key` | Wrong or expired API key | Regenerate API key in admin profile |
-    | `Access denied` | Invalid access code | Verify access code is correct |
-    | `Missing required parameters` | Required field not provided | Check API documentation for required fields |
-    | `Invalid action` | Action name is incorrect | Verify action name spelling |
-    | `Permission denied` | Insufficient privileges | Ensure API access code is assigned to Administrators group |
+    ### 🔒 Security Best Practices
     
-    ## Rate Limiting
+    - ✅ Use HTTPS (port 9000) in production
+    - ✅ Whitelist IPs in access code settings
+    - ✅ Rotate API keys regularly
+    - ✅ Never commit keys to version control
     
-    XUI.ONE implements rate limiting to prevent abuse:
+    ---
     
-    - Default: No strict rate limit
-    - Recommended: Max 100 requests per minute per IP
-    - Heavy operations (database queries): Use sparingly
+    ### 📚 Resources
     
-    If you experience rate limiting, implement exponential backoff in your application.
-    
-    ## Security Best Practices
-    
-    1. 🔒 **Use HTTPS** - Always use port 9000 with SSL enabled in production
-    2. 🔐 **IP Whitelisting** - Restrict API access to specific IPs
-    3. 🔑 **Rotate Keys** - Regenerate API keys periodically
-    4. 📝 **Audit Logs** - Monitor API usage via activity logs
-    5. 🚫 **Never Expose Keys** - Don't commit API keys to version control
-    6. 🛡️ **HMAC Authentication** - Use HMAC for enhanced security (advanced)
-    
-    ## HMAC Authentication (Advanced)
-    
-    For enhanced security, XUI.ONE supports HMAC-based authentication:
-    
-    1. Generate HMAC key: `action=create_hmac`
-    2. Sign each request with HMAC-SHA256
-    3. Include signature in request header
-    
-    See detailed HMAC documentation for implementation details.
-    
-    ## Getting Help
-    
-    - 📖 Documentation: https://github.com/worldofiptvcom/xui-one-api-docs
-    - 💬 Community: World of IPTV Forums (https://www.worldofiptv.com)
-    - 🐛 Issues: Report bugs via GitHub Issues
-    - 📧 Support: Contact XUI.ONE support team
-    
-    ## API Version
-    
-    Current API Version: **v1.5.13**
-    
-    Compatible with XUI.ONE versions 1.5.5+
+    - **GitHub:** [Documentation Repository](https://github.com/worldofiptvcom/xui-one-api-docs)
+    - **Community:** [World of IPTV Forums](https://www.worldofiptv.com)
+    - **Getting Started:** [Setup Guide](https://github.com/worldofiptvcom/xui-one-api-docs/blob/main/docs/getting-started.md)
+    - **XUI.ONE:** [Official Website](https://xui.one)
     
   version: 1.5.13
   contact:
@@ -259,9 +171,14 @@ paths:
       description: |
         Base endpoint for all API requests. All actions are performed by adding the `action` parameter.
         
-        **Usage:**
+        **Usage Pattern:**
         ```
-        /?api_key=<API-KEY>&action=ACTION_NAME&param1=value1&param2=value2
+        /?api_key=<API-KEY>&action=ACTION_NAME&param1=value1
+        ```
+        
+        **Example:**
+        ```bash
+        curl "http://your-server.com/cSbuFLhp/?api_key=8D3135D30437F86EAE2FA4A2A8345000&action=user_info"
         ```
       operationId: apiBase
       tags:
@@ -289,7 +206,9 @@ paths:
       description: |
         Retrieves information about the currently authenticated admin user.
         
-        **Use Case:** Verify authentication and check admin privileges.
+        **Purpose:** Verify API authentication and check admin privileges.
+        
+        ---
         
         **Example Request:**
         ```bash
@@ -311,6 +230,14 @@ paths:
           }
         }
         ```
+        
+        ---
+        
+        **Use Cases:**
+        - ✅ Test API authentication
+        - ✅ Verify admin access
+        - ✅ Get current user details
+        - ✅ Check account status
       operationId: getUserInfo
       tags:
         - Authentication
@@ -319,13 +246,14 @@ paths:
         - name: action
           in: query
           required: true
+          description: Action to perform
           schema:
             type: string
             enum: [user_info]
           example: user_info
       responses:
         '200':
-          description: Current user information
+          description: Current user information retrieved successfully
           content:
             application/json:
               schema:
@@ -355,7 +283,7 @@ components:
       in: query
       name: api_key
       description: |
-        API key for authentication. Generate from your admin profile in the XUI.ONE panel.
+        API key for authentication. Generate from your admin profile.
         
         **Example:** `8D3135D30437F86EAE2FA4A2A8345000`
 
@@ -415,6 +343,7 @@ components:
 
     UserInfo:
       type: object
+      description: User information object
       properties:
         id:
           type: string
