@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="description" content="XUI.ONE Admin API Documentation - Interactive Swagger UI" />
+  <title>XUI.ONE Admin API Documentation</title>
+  <link rel="stylesheet" href="https://unpkg.com/swagger-ui-dist@5.9.0/swagger-ui.css" />
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+    }
+    
+    .topbar {
+      display: none;
+    }
+    
+    .swagger-ui .info {
+      margin: 50px 0;
+    }
+    
+    .swagger-ui .info .title {
+      font-size: 36px;
+      color: #3b4151;
+    }
+    
+    .custom-header {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 30px;
+      text-align: center;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+    
+    .custom-header h1 {
+      margin: 0;
+      font-size: 42px;
+      font-weight: 700;
+    }
+    
+    .custom-header p {
+      margin: 10px 0 0;
+      font-size: 18px;
+      opacity: 0.9;
+    }
+    
+    .custom-links {
+      margin-top: 20px;
+    }
+    
+    .custom-links a {
+      color: white;
+      text-decoration: none;
+      margin: 0 15px;
+      padding: 8px 20px;
+      border: 2px solid white;
+      border-radius: 5px;
+      transition: all 0.3s;
+      display: inline-block;
+    }
+    
+    .custom-links a:hover {
+      background: white;
+      color: #667eea;
+    }
+    
+    .info-banner {
+      background: #fff3cd;
+      border: 1px solid #ffc107;
+      border-radius: 5px;
+      padding: 15px;
+      margin: 20px auto;
+      max-width: 1200px;
+      text-align: center;
+    }
+    
+    .info-banner strong {
+      color: #856404;
+    }
+  </style>
+</head>
+<body>
+  <div class="custom-header">
+    <h1>🎬 XUI.ONE Admin API</h1>
+    <p>Complete API Documentation for IPTV Panel Administration</p>
+    <div class="custom-links">
+      <a href="https://github.com/worldofiptvcom/xui-one-api-docs" target="_blank">📖 GitHub</a>
+      <a href="https://www.worldofiptv.com" target="_blank">💬 Community</a>
+      <a href="https://xui.one" target="_blank">🌐 XUI.ONE</a>
+    </div>
+  </div>
+  
+  <div class="info-banner">
+    <strong>📢 Note:</strong> This documentation is for XUI.ONE v1.5.13+. 
+    Replace placeholder values (<code>your-server.com</code>, <code>&lt;API-KEY&gt;</code>, <code>&lt;Access-Code&gt;</code>) with your actual credentials.
+  </div>
+  
+  <div id="swagger-ui"></div>
+  
+  <script src="https://unpkg.com/swagger-ui-dist@5.9.0/swagger-ui-bundle.js" crossorigin></script>
+  <script src="https://unpkg.com/swagger-ui-dist@5.9.0/swagger-ui-standalone-preset.js" crossorigin></script>
+  <script>
+    window.onload = () => {
+      window.ui = SwaggerUIBundle({
+        url: './openapi.yaml',
+        dom_id: '#swagger-ui',
+        deepLinking: true,
+        presets: [
+          SwaggerUIBundle.presets.apis,
+          SwaggerUIStandalonePreset
+        ],
+        plugins: [
+          SwaggerUIBundle.plugins.DownloadUrl
+        ],
+        layout: "StandaloneLayout",
+        defaultModelsExpandDepth: 1,
+        defaultModelExpandDepth: 1,
+        docExpansion: 'list',
+        filter: true,
+        showRequestHeaders: true,
+        tryItOutEnabled: true,
+        requestSnippetsEnabled: true,
+        requestSnippets: {
+          generators: {
+            curl_bash: {
+              title: "cURL (bash)",
+              syntax: "bash"
+            },
+            curl_powershell: {
+              title: "cURL (PowerShell)",
+              syntax: "powershell"
+            },
+            curl_cmd: {
+              title: "cURL (CMD)",
+              syntax: "bash"
+            }
+          },
+          defaultExpanded: true,
+          languages: null
+        }
+      });
+    };
+  </script>
+  
+  <footer style="text-align: center; padding: 40px 20px; background: #fafafa; margin-top: 50px; border-top: 1px solid #e5e5e5;">
+    <p style="color: #666; margin: 0;">
+      <strong>XUI.ONE Admin API Documentation</strong>
+    </p>
+    <p style="color: #999; margin: 10px 0 0; font-size: 14px;">
+      Made with ❤️ by <a href="https://www.worldofiptv.com" target="_blank" style="color: #667eea; text-decoration: none;">World of IPTV</a>
+    </p>
+    <p style="color: #999; margin: 10px 0 0; font-size: 12px;">
+      Documentation licensed under MIT | XUI.ONE software is proprietary
+    </p>
+  </footer>
+</body>
+</html>

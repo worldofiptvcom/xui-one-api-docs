@@ -1,0 +1,78 @@
+# Editor directories and files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# OS files
+Thumbs.db
+Desktop.ini
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Environment variables (IMPORTANT: Never commit credentials!)
+.env
+.env.local
+.env.*.local
+config.local.yaml
+secrets.yaml
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+
+# API keys and credentials (IMPORTANT: Never commit these!)
+**/api-keys.txt
+**/credentials.json
+**/secrets.json
+
+# Build outputs
+dist/
+build/
+out/
+
+# Dependency directories
+node_modules/
+vendor/
+
+# Test coverage
+coverage/
+.nyc_output/
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+ENV/
+.venv
+
+# Ruby
+*.gem
+*.rbc
+/.config
+/coverage/
+/InstalledFiles
+/pkg/
+/spec/reports/
+/test/tmp/
+/test/version_tmp/
+/tmp/
+
+# PHP
+/vendor/
+composer.lock
+
+# Documentation build
+docs/_build/
+site/

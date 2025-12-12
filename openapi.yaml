@@ -1,0 +1,479 @@
+openapi: 3.0.3
+info:
+  title: XUI.ONE Admin API
+  description: |
+    # XUI.ONE Admin API Documentation
+    
+    Comprehensive API documentation for XUI.ONE IPTV Panel Administration.
+    
+    ## Overview
+    
+    The XUI.ONE Admin API provides programmatic access to manage your IPTV platform. With over 180+ endpoints, you can:
+    
+    - Manage subscriptions (Lines, MAG devices, Enigma2 devices)
+    - Control streams, channels, movies, and series
+    - Monitor connections and logs
+    - Configure servers and load balancers
+    - Administer users and resellers
+    
+    ## Base URL Structure
+    
+    All API requests follow this pattern:
+    
+    ```
+    http://YOUR_SERVER:PORT/<Access-Code>/?api_key=<API-KEY>&action=ACTION_NAME
+    ```
+    
+    **Components:**
+    - `YOUR_SERVER` - Your XUI.ONE server IP or domain
+    - `PORT` - API port (default: 80 for HTTP, 8000 for HTTP explicit, 9000 for HTTPS)
+    - `<Access-Code>` - Unique access code for API access
+    - `<API-KEY>` - Your generated API key
+    - `ACTION_NAME` - The API action to perform
+    
+    ## Authentication
+    
+    XUI.ONE API uses **API Key authentication** combined with **Access Codes** for secure access.
+    
+    ### Prerequisites
+    
+    Before using the API, you need:
+    
+    1. ✅ XUI.ONE panel installed and running
+    2. ✅ Admin account with appropriate permissions
+    3. ✅ Admin API access code created
+    4. ✅ API key generated
+    
+    ### Step 1: Create Admin API Access Code
+    
+    1. Log into your XUI.ONE admin panel
+    2. Navigate to **Management → Access Control → Access Codes**
+    3. Click **Add Access Code**
+    4. Select **Access Type: Admin API**
+    5. Assign to **Administrators** group
+    6. (Optional) Restrict to specific IP address for security
+    7. Save the access code (e.g., `cSbuFLhp`)
+    
+    ### Step 2: Generate API Key
+    
+    1. Log into admin panel
+    2. Click your profile (top right)
+    3. Select **Edit Profile**
+    4. Click the blue **Generate API Key** button
+    5. Copy and save your API key (e.g., `8D3135D30437F86EAE2FA4A2A8345000`)
+    
+    ⚠️ **Security Warning:** Keep your API key secure. If compromised, regenerate immediately.
+    
+    ### Step 3: Test Authentication
+    
+    Test your credentials with a simple API call:
+    
+    ```bash
+    curl "http://your-server.com/cSbuFLhp/?api_key=8D3135D30437F86EAE2FA4A2A8345000&action=user_info"
+    ```
+    
+    Successful response:
+    ```json
+    {
+      "status": "STATUS_SUCCESS",
+      "data": {
+        "username": "admin",
+        "member_group_id": "1",
+        ...
+      }
+    }
+    ```
+    
+    ## Request Methods
+    
+    The API supports both **GET** and **POST** methods:
+    
+    ### GET Requests
+    
+    Pass parameters in the URL query string:
+    
+    ```
+    http://your-server.com/cSbuFLhp/?api_key=8D3135D30437F86EAE2FA4A2A8345000&action=get_lines&limit=10
+    ```
+    
+    ### POST Requests
+    
+    Send parameters as form data or JSON in request body:
+    
+    ```bash
+    curl -X POST "http://your-server.com/cSbuFLhp/?api_key=8D3135D30437F86EAE2FA4A2A8345000&action=create_line" \
+      -d "username=testuser" \
+      -d "password=testpass" \
+      -d "max_connections=1"
+    ```
+    
+    ## Response Format
+    
+    All API responses return JSON with a consistent structure:
+    
+    ### Success Response
+    
+    ```json
+    {
+      "status": "STATUS_SUCCESS",
+      "data": {
+        // Response data here
+      }
+    }
+    ```
+    
+    ### Error Response
+    
+    ```json
+    {
+      "status": "STATUS_FAILURE",
+      "error": "Error message description"
+    }
+    ```
+    
+    ## Common Error Messages
+    
+    | Error Message | Cause | Solution |
+    |--------------|-------|----------|
+    | `Invalid API key` | Wrong or expired API key | Regenerate API key in admin profile |
+    | `Access denied` | Invalid access code | Verify access code is correct |
+    | `Missing required parameters` | Required field not provided | Check API documentation for required fields |
+    | `Invalid action` | Action name is incorrect | Verify action name spelling |
+    | `Permission denied` | Insufficient privileges | Ensure API access code is assigned to Administrators group |
+    
+    ## Rate Limiting
+    
+    XUI.ONE implements rate limiting to prevent abuse:
+    
+    - Default: No strict rate limit
+    - Recommended: Max 100 requests per minute per IP
+    - Heavy operations (database queries): Use sparingly
+    
+    If you experience rate limiting, implement exponential backoff in your application.
+    
+    ## Security Best Practices
+    
+    1. 🔒 **Use HTTPS** - Always use port 9000 with SSL enabled in production
+    2. 🔐 **IP Whitelisting** - Restrict API access to specific IPs
+    3. 🔑 **Rotate Keys** - Regenerate API keys periodically
+    4. 📝 **Audit Logs** - Monitor API usage via activity logs
+    5. 🚫 **Never Expose Keys** - Don't commit API keys to version control
+    6. 🛡️ **HMAC Authentication** - Use HMAC for enhanced security (advanced)
+    
+    ## HMAC Authentication (Advanced)
+    
+    For enhanced security, XUI.ONE supports HMAC-based authentication:
+    
+    1. Generate HMAC key: `action=create_hmac`
+    2. Sign each request with HMAC-SHA256
+    3. Include signature in request header
+    
+    See detailed HMAC documentation for implementation details.
+    
+    ## Getting Help
+    
+    - 📖 Documentation: https://github.com/worldofiptvcom/xui-one-api-docs
+    - 💬 Community: World of IPTV Forums (https://www.worldofiptv.com)
+    - 🐛 Issues: Report bugs via GitHub Issues
+    - 📧 Support: Contact XUI.ONE support team
+    
+    ## API Version
+    
+    Current API Version: **v1.5.13**
+    
+    Compatible with XUI.ONE versions 1.5.5+
+    
+  version: 1.5.13
+  contact:
+    name: XUI.ONE API Support
+    url: https://xui.one
+  license:
+    name: Proprietary
+    url: https://xui.one
+
+servers:
+  - url: http://{server}:{port}/{accessCode}
+    description: XUI.ONE API Server (HTTP)
+    variables:
+      server:
+        default: your-server.com
+        description: Your XUI.ONE server IP or domain
+      port:
+        default: '80'
+        description: API port
+        enum:
+          - '80'
+          - '8000'
+      accessCode:
+        default: cSbuFLhp
+        description: Your unique access code for API access
+  - url: https://{server}:9000/{accessCode}
+    description: XUI.ONE API Server (HTTPS - Recommended)
+    variables:
+      server:
+        default: your-server.com
+        description: Your XUI.ONE server IP or domain
+      accessCode:
+        default: cSbuFLhp
+        description: Your unique access code for API access
+
+security:
+  - ApiKeyAuth: []
+
+tags:
+  - name: Authentication
+    description: Authentication and authorization operations
+  - name: GET INFO
+    description: Query and retrieve information
+  - name: Logs & Events
+    description: Activity logs, connections, and monitoring
+  - name: Line API
+    description: Subscription line management
+  - name: User API
+    description: User account management
+  - name: MAG API
+    description: MAG device management
+  - name: Enigma API
+    description: Enigma2 STB management
+  - name: Streams API
+    description: Live stream management
+  - name: Channel API
+    description: Channel management
+  - name: Station API
+    description: Radio station management
+  - name: Movie API
+    description: VOD movie management
+  - name: Series API
+    description: Series management
+  - name: Episode API
+    description: Episode management
+  - name: Servers API
+    description: Server and load balancer management
+  - name: Settings & System
+    description: System settings and administrative functions
+
+paths:
+  /:
+    get:
+      summary: API Base Endpoint
+      description: |
+        Base endpoint for all API requests. All actions are performed by adding the `action` parameter.
+        
+        **Usage:**
+        ```
+        /?api_key=<API-KEY>&action=ACTION_NAME&param1=value1&param2=value2
+        ```
+      operationId: apiBase
+      tags:
+        - Authentication
+      parameters:
+        - $ref: '#/components/parameters/ApiKey'
+        - $ref: '#/components/parameters/Action'
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/SuccessResponse'
+                  - $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/ServerError'
+
+  /?action=user_info:
+    get:
+      summary: Get Current User Info
+      description: |
+        Retrieves information about the currently authenticated admin user.
+        
+        **Use Case:** Verify authentication and check admin privileges.
+        
+        **Example Request:**
+        ```bash
+        curl "http://your-server.com/cSbuFLhp/?api_key=8D3135D30437F86EAE2FA4A2A8345000&action=user_info"
+        ```
+        
+        **Example Response:**
+        ```json
+        {
+          "status": "STATUS_SUCCESS",
+          "data": {
+            "id": "1",
+            "username": "admin",
+            "member_group_id": "1",
+            "email": "admin@example.com",
+            "date_registered": "1609459200",
+            "last_login": "1734048000",
+            "status": "1"
+          }
+        }
+        ```
+      operationId: getUserInfo
+      tags:
+        - Authentication
+      parameters:
+        - $ref: '#/components/parameters/ApiKey'
+        - name: action
+          in: query
+          required: true
+          schema:
+            type: string
+            enum: [user_info]
+          example: user_info
+      responses:
+        '200':
+          description: Current user information
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/SuccessResponse'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/UserInfo'
+              example:
+                status: "STATUS_SUCCESS"
+                data:
+                  id: "1"
+                  username: "admin"
+                  member_group_id: "1"
+                  email: "admin@example.com"
+                  date_registered: "1609459200"
+                  last_login: "1734048000"
+                  status: "1"
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+components:
+  securitySchemes:
+    ApiKeyAuth:
+      type: apiKey
+      in: query
+      name: api_key
+      description: |
+        API key for authentication. Generate from your admin profile in the XUI.ONE panel.
+        
+        **Example:** `8D3135D30437F86EAE2FA4A2A8345000`
+
+  parameters:
+    ApiKey:
+      name: api_key
+      in: query
+      required: true
+      description: Your API key for authentication
+      schema:
+        type: string
+        example: "8D3135D30437F86EAE2FA4A2A8345000"
+    
+    Action:
+      name: action
+      in: query
+      required: true
+      description: The API action to perform
+      schema:
+        type: string
+      example: user_info
+
+  schemas:
+    SuccessResponse:
+      type: object
+      required:
+        - status
+        - data
+      properties:
+        status:
+          type: string
+          enum: [STATUS_SUCCESS]
+          description: Response status indicator
+        data:
+          type: object
+          description: Response data (structure varies by endpoint)
+      example:
+        status: "STATUS_SUCCESS"
+        data: {}
+
+    ErrorResponse:
+      type: object
+      required:
+        - status
+        - error
+      properties:
+        status:
+          type: string
+          enum: [STATUS_FAILURE]
+          description: Error status indicator
+        error:
+          type: string
+          description: Error message describing what went wrong
+      example:
+        status: "STATUS_FAILURE"
+        error: "Invalid API key"
+
+    UserInfo:
+      type: object
+      properties:
+        id:
+          type: string
+          description: User ID
+          example: "1"
+        username:
+          type: string
+          description: Username
+          example: "admin"
+        member_group_id:
+          type: string
+          description: Member group ID (1 = Administrator)
+          example: "1"
+        email:
+          type: string
+          format: email
+          description: User email address
+          example: "admin@example.com"
+        date_registered:
+          type: string
+          description: Unix timestamp of registration date
+          example: "1609459200"
+        last_login:
+          type: string
+          description: Unix timestamp of last login
+          example: "1734048000"
+        status:
+          type: string
+          description: User status (1 = Active, 0 = Inactive)
+          enum: ["0", "1"]
+          example: "1"
+
+  responses:
+    Unauthorized:
+      description: Authentication failed - Invalid API key or access code
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            status: "STATUS_FAILURE"
+            error: "Invalid API key"
+
+    ServerError:
+      description: Internal server error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            status: "STATUS_FAILURE"
+            error: "Internal server error"
+
+    NotFound:
+      description: Resource not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            status: "STATUS_FAILURE"
+            error: "Resource not found"
