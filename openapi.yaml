@@ -278,6 +278,486 @@ paths:
         '401':
           $ref: '#/components/responses/Unauthorized'
 
+  /?action=get_lines:
+    get:
+      summary: Get All Subscription Lines
+      description: |
+        Retrieves a list of all subscription lines in your XUI.ONE panel.
+        
+        **Purpose:** View and manage all active and inactive subscription lines.
+        
+        ---
+        
+        **Example Request:**
+        ```bash
+        curl "http://your-server.com/cSbuFLhp/?api_key=8D3135D30437F86EAE2FA4A2A8345000&action=get_lines"
+        ```
+        
+        **Use Cases:**
+        - ✅ List all subscriptions
+        - ✅ Monitor active lines
+        - ✅ Export subscription data
+        - ✅ Check expiration dates
+        - ✅ View connection limits
+      operationId: getLines
+      tags:
+        - GET INFO
+      parameters:
+        - $ref: '#/components/parameters/ApiKey'
+        - name: action
+          in: query
+          required: true
+          schema:
+            type: string
+            enum: [get_lines]
+      responses:
+        '200':
+          description: List of all subscription lines
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/SuccessResponse'
+                  - type: object
+                    properties:
+                      data:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/Line'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /?action=get_users:
+    get:
+      summary: Get All Users
+      description: |
+        Retrieves a list of all user accounts in your XUI.ONE panel.
+        
+        **Purpose:** View all admin, reseller, and user accounts.
+        
+        ---
+        
+        **Example Request:**
+        ```bash
+        curl "http://your-server.com/cSbuFLhp/?api_key=8D3135D30437F86EAE2FA4A2A8345000&action=get_users"
+        ```
+        
+        **Use Cases:**
+        - ✅ List all users
+        - ✅ View user roles and permissions
+        - ✅ Audit user accounts
+        - ✅ Export user data
+      operationId: getUsers
+      tags:
+        - GET INFO
+      parameters:
+        - $ref: '#/components/parameters/ApiKey'
+        - name: action
+          in: query
+          required: true
+          schema:
+            type: string
+            enum: [get_users]
+      responses:
+        '200':
+          description: List of all users
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/SuccessResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /?action=get_streams:
+    get:
+      summary: Get All Live Streams
+      description: |
+        Retrieves a list of all live TV streams configured in your panel.
+        
+        **Purpose:** View all live streaming channels and their configurations.
+        
+        ---
+        
+        **Example Request:**
+        ```bash
+        curl "http://your-server.com/cSbuFLhp/?api_key=8D3135D30437F86EAE2FA4A2A8345000&action=get_streams"
+        ```
+        
+        **Use Cases:**
+        - ✅ List all live streams
+        - ✅ Check stream status
+        - ✅ View stream sources
+        - ✅ Monitor stream health
+        - ✅ Export stream configurations
+      operationId: getStreams
+      tags:
+        - GET INFO
+      parameters:
+        - $ref: '#/components/parameters/ApiKey'
+        - name: action
+          in: query
+          required: true
+          schema:
+            type: string
+            enum: [get_streams]
+      responses:
+        '200':
+          description: List of all live streams
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/SuccessResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /?action=get_channels:
+    get:
+      summary: Get All Channels
+      description: |
+        Retrieves a list of all channels configured in your panel.
+        
+        **Purpose:** View all channel configurations and metadata.
+        
+        ---
+        
+        **Example Request:**
+        ```bash
+        curl "http://your-server.com/cSbuFLhp/?api_key=8D3135D30437F86EAE2FA4A2A8345000&action=get_channels"
+        ```
+        
+        **Use Cases:**
+        - ✅ List all channels
+        - ✅ View channel categories
+        - ✅ Check EPG data
+        - ✅ Export channel list
+      operationId: getChannels
+      tags:
+        - GET INFO
+      parameters:
+        - $ref: '#/components/parameters/ApiKey'
+        - name: action
+          in: query
+          required: true
+          schema:
+            type: string
+            enum: [get_channels]
+      responses:
+        '200':
+          description: List of all channels
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/SuccessResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /?action=get_movies:
+    get:
+      summary: Get All Movies
+      description: |
+        Retrieves a list of all VOD movies in your panel.
+        
+        **Purpose:** View all movie content and metadata.
+        
+        ---
+        
+        **Example Request:**
+        ```bash
+        curl "http://your-server.com/cSbuFLhp/?api_key=8D3135D30437F86EAE2FA4A2A8345000&action=get_movies"
+        ```
+        
+        **Use Cases:**
+        - ✅ List all movies
+        - ✅ View movie metadata (title, year, rating)
+        - ✅ Check movie availability
+        - ✅ Export movie catalog
+        - ✅ Monitor storage usage
+      operationId: getMovies
+      tags:
+        - GET INFO
+      parameters:
+        - $ref: '#/components/parameters/ApiKey'
+        - name: action
+          in: query
+          required: true
+          schema:
+            type: string
+            enum: [get_movies]
+      responses:
+        '200':
+          description: List of all movies
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/SuccessResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /?action=get_series_list:
+    get:
+      summary: Get All Series
+      description: |
+        Retrieves a list of all TV series in your panel.
+        
+        **Purpose:** View all series content and metadata.
+        
+        ---
+        
+        **Example Request:**
+        ```bash
+        curl "http://your-server.com/cSbuFLhp/?api_key=8D3135D30437F86EAE2FA4A2A8345000&action=get_series_list"
+        ```
+        
+        **Use Cases:**
+        - ✅ List all TV series
+        - ✅ View series metadata
+        - ✅ Check episode counts
+        - ✅ Export series catalog
+      operationId: getSeriesList
+      tags:
+        - GET INFO
+      parameters:
+        - $ref: '#/components/parameters/ApiKey'
+        - name: action
+          in: query
+          required: true
+          schema:
+            type: string
+            enum: [get_series_list]
+      responses:
+        '200':
+          description: List of all series
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/SuccessResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /?action=get_episodes:
+    get:
+      summary: Get All Episodes
+      description: |
+        Retrieves a list of all episodes across all series.
+        
+        **Purpose:** View all episode content and metadata.
+        
+        ---
+        
+        **Example Request:**
+        ```bash
+        curl "http://your-server.com/cSbuFLhp/?api_key=8D3135D30437F86EAE2FA4A2A8345000&action=get_episodes"
+        ```
+        
+        **Note:** To get episodes for a specific series, use the series_id parameter.
+        
+        **Use Cases:**
+        - ✅ List all episodes
+        - ✅ View episode metadata
+        - ✅ Check episode availability
+        - ✅ Filter by series
+      operationId: getEpisodes
+      tags:
+        - GET INFO
+      parameters:
+        - $ref: '#/components/parameters/ApiKey'
+        - name: action
+          in: query
+          required: true
+          schema:
+            type: string
+            enum: [get_episodes]
+        - name: series_id
+          in: query
+          required: false
+          description: Filter episodes by series ID
+          schema:
+            type: integer
+          example: 123
+      responses:
+        '200':
+          description: List of episodes
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/SuccessResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /?action=get_mags:
+    get:
+      summary: Get All MAG Devices
+      description: |
+        Retrieves a list of all MAG devices configured in your panel.
+        
+        **Purpose:** View all MAG set-top box subscriptions.
+        
+        ---
+        
+        **Example Request:**
+        ```bash
+        curl "http://your-server.com/cSbuFLhp/?api_key=8D3135D30437F86EAE2FA4A2A8345000&action=get_mags"
+        ```
+        
+        **Use Cases:**
+        - ✅ List all MAG devices
+        - ✅ View MAC addresses
+        - ✅ Check device status
+        - ✅ Monitor connections
+      operationId: getMags
+      tags:
+        - GET INFO
+      parameters:
+        - $ref: '#/components/parameters/ApiKey'
+        - name: action
+          in: query
+          required: true
+          schema:
+            type: string
+            enum: [get_mags]
+      responses:
+        '200':
+          description: List of all MAG devices
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/SuccessResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /?action=get_enigmas:
+    get:
+      summary: Get All Enigma2 Devices
+      description: |
+        Retrieves a list of all Enigma2 devices configured in your panel.
+        
+        **Purpose:** View all Enigma2 STB subscriptions.
+        
+        ---
+        
+        **Example Request:**
+        ```bash
+        curl "http://your-server.com/cSbuFLhp/?api_key=8D3135D30437F86EAE2FA4A2A8345000&action=get_enigmas"
+        ```
+        
+        **Use Cases:**
+        - ✅ List all Enigma2 devices
+        - ✅ View device status
+        - ✅ Check expiration dates
+        - ✅ Monitor connections
+      operationId: getEnigmas
+      tags:
+        - GET INFO
+      parameters:
+        - $ref: '#/components/parameters/ApiKey'
+        - name: action
+          in: query
+          required: true
+          schema:
+            type: string
+            enum: [get_enigmas]
+      responses:
+        '200':
+          description: List of all Enigma2 devices
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/SuccessResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /?action=get_stations:
+    get:
+      summary: Get All Radio Stations
+      description: |
+        Retrieves a list of all radio stations configured in your panel.
+        
+        **Purpose:** View all radio streaming channels.
+        
+        ---
+        
+        **Example Request:**
+        ```bash
+        curl "http://your-server.com/cSbuFLhp/?api_key=8D3135D30437F86EAE2FA4A2A8345000&action=get_stations"
+        ```
+        
+        **Use Cases:**
+        - ✅ List all radio stations
+        - ✅ View station metadata
+        - ✅ Check stream sources
+        - ✅ Export station list
+      operationId: getStations
+      tags:
+        - GET INFO
+      parameters:
+        - $ref: '#/components/parameters/ApiKey'
+        - name: action
+          in: query
+          required: true
+          schema:
+            type: string
+            enum: [get_stations]
+      responses:
+        '200':
+          description: List of all radio stations
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/SuccessResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /?action=get_packages:
+    get:
+      summary: Get All Packages
+      description: |
+        Retrieves a list of all subscription packages (bouquets) in your panel.
+        
+        **Purpose:** View all available subscription packages and their configurations.
+        
+        ---
+        
+        **Example Request:**
+        ```bash
+        curl "http://your-server.com/cSbuFLhp/?api_key=8D3135D30437F86EAE2FA4A2A8345000&action=get_packages"
+        ```
+        
+        **Use Cases:**
+        - ✅ List all packages
+        - ✅ View package pricing
+        - ✅ Check channel assignments
+        - ✅ Export package configurations
+      operationId: getPackages
+      tags:
+        - GET INFO
+      parameters:
+        - $ref: '#/components/parameters/ApiKey'
+        - name: action
+          in: query
+          required: true
+          schema:
+            type: string
+            enum: [get_packages]
+      responses:
+        '200':
+          description: List of all packages
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/SuccessResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
 components:
   securitySchemes:
     ApiKeyAuth:
@@ -377,6 +857,58 @@ components:
           description: User status (1 = Active, 0 = Inactive)
           enum: ["0", "1"]
           example: "1"
+
+    Line:
+      type: object
+      description: Subscription line object
+      properties:
+        id:
+          type: string
+          description: Line ID
+          example: "123"
+        username:
+          type: string
+          description: Line username
+          example: "testuser"
+        password:
+          type: string
+          description: Line password
+          example: "testpass123"
+        exp_date:
+          type: string
+          description: Expiration date (Unix timestamp)
+          example: "1735689600"
+        max_connections:
+          type: string
+          description: Maximum concurrent connections allowed
+          example: "1"
+        is_trial:
+          type: string
+          description: Trial status (0 = No, 1 = Yes)
+          enum: ["0", "1"]
+          example: "0"
+        enabled:
+          type: string
+          description: Line status (0 = Disabled, 1 = Enabled)
+          enum: ["0", "1"]
+          example: "1"
+        is_restreamer:
+          type: string
+          description: Reseller status (0 = No, 1 = Yes)
+          enum: ["0", "1"]
+          example: "0"
+        bouquet:
+          type: string
+          description: Assigned bouquet/package IDs (JSON array)
+          example: "[1,2,3]"
+        notes:
+          type: string
+          description: Admin notes
+          example: "Premium customer"
+        created_at:
+          type: string
+          description: Creation date (Unix timestamp)
+          example: "1609459200"
 
   responses:
     Unauthorized:
