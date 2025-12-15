@@ -17,6 +17,11 @@ info:
     ### 2. Authorize
     Click the **"Authorize" 🔓** button (top right) and enter your API key.
     
+    **IMPORTANT:** Once you authorize, your API key is automatically added to ALL requests!
+    You do NOT need to manually enter it in the "Parameters" section for each endpoint.
+    
+    The api_key field in Parameters will be auto-filled when you click "Execute".
+    
     ### 3. Try Endpoints
     - Click any endpoint to expand it
     - Click **"Try it out"** button
@@ -50,6 +55,14 @@ info:
     
     - **API Key**: Required for all requests (add `?api_key=YOUR-KEY`)
     - **Generate API Key**: In XUI.ONE admin panel → Profile → API Settings
+    - **Enter Once**: Click "Authorize" button → Enter key → Never re-enter it!
+    
+    **Your browser remembers:**
+    - ✅ Server configuration (IP, port, access code)
+    - ✅ API key (via Authorize button)
+    - ✅ All settings persist across page refreshes
+    
+    **You only need to configure once, then just use endpoints!**
     
     ## 📖 Response Format
     
