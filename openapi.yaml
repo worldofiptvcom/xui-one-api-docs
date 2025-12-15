@@ -53,7 +53,7 @@ tags:
     description: Series management
   - name: Episode API
     description: Episode management
-  - name: Servers API
+  - name: Server API
     description: Server and load balancer management
   - name: Settings & System
     description: System settings and administrative functions
@@ -1731,7 +1731,22 @@ paths:
   /?action=create_user:
     post:
       summary: Create New User Account
-      description: Create admin, reseller, or user account
+      description: |
+        Create a new admin, reseller, or user account in the panel.
+        
+        **Member Group IDs:**
+        - 1 = Admin (full access)
+        - 2 = Reseller (can create lines)
+        - 3 = User (customer account)
+        
+        **Example:**
+        ```bash
+        curl -X POST "http://your-server.com/cSbuFLhp/?api_key=API-KEY&action=create_user" \
+          -d "username=newreseller" \
+          -d "password=secure123" \
+          -d "email=reseller@example.com" \
+          -d "member_group_id=2"
+        ```
       tags: [User API]
       operationId: createUser
       parameters:
@@ -1739,120 +1754,301 @@ paths:
         - name: action
           in: query
           required: true
-          schema: {type: string, enum: [create_user]}
+          schema:
+            type: string
+            enum: [create_user]
       requestBody:
         required: true
         content:
           application/x-www-form-urlencoded:
             schema:
+              type: object
               required: [username, password]
               properties:
-                username: {type: string, example: "newadmin"}
-                password: {type: string, example: "secure123"}
-                email: {type: string, example: "admin@example.com"}
-                member_group_id: {type: integer, description: "1=Admin, 2=Reseller, 3=User", example: 2}
+                username:
+                  type: string
+                  description: Username for login
+                  example: "newreseller"
+                password:
+                  type: string
+                  description: Account password
+                  example: "secure123"
+                email:
+                  type: string
+                  format: email
+                  description: Email address
+                  example: "reseller@example.com"
+                member_group_id:
+                  type: integer
+                  description: "User type: 1=Admin, 2=Reseller, 3=User"
+                  enum: [1, 2, 3]
+                  default: 3
+                  example: 2
+                max_connections:
+                  type: integer
+                  description: Maximum concurrent connections
+                  example: 1
+                notes:
+                  type: string
+                  description: Admin notes
+                  example: "Premium reseller"
       responses:
-        '200': {description: User created, content: {application/json: {schema: {$ref: '#/components/schemas/SuccessResponse'}}}}
+        '200':
+          description: User created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
 
   /?action=edit_user:
     post:
       summary: Edit User Account
+      description: |
+        Modify user account settings.
+        
+        **Example:**
+        ```bash
+        curl -X POST "http://your-server.com/cSbuFLhp/?api_key=API-KEY&action=edit_user" \
+          -d "id=5" \
+          -d "password=newsecure456" \
+          -d "email=newemail@example.com"
+        ```
       tags: [User API]
       operationId: editUser
       parameters:
         - $ref: '#/components/parameters/ApiKey'
         - name: action
           in: query
-          schema: {type: string, enum: [edit_user]}
+          required: true
+          schema:
+            type: string
+            enum: [edit_user]
       requestBody:
+        required: true
         content:
           application/x-www-form-urlencoded:
             schema:
+              type: object
               required: [id]
               properties:
-                id: {type: integer, example: 5}
-                password: {type: string}
-                email: {type: string}
+                id:
+                  type: integer
+                  description: User ID to edit
+                  example: 5
+                username:
+                  type: string
+                  description: New username
+                  example: "updateduser"
+                password:
+                  type: string
+                  description: New password
+                  example: "newsecure456"
+                email:
+                  type: string
+                  format: email
+                  description: New email
+                  example: "newemail@example.com"
+                member_group_id:
+                  type: integer
+                  description: New user type
+                  enum: [1, 2, 3]
+                  example: 2
+                max_connections:
+                  type: integer
+                  description: New connection limit
+                  example: 2
+                notes:
+                  type: string
+                  description: Updated notes
+                  example: "VIP reseller"
       responses:
-        '200': {description: User updated}
+        '200':
+          description: User updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
 
   /?action=delete_user:
     post:
       summary: Delete User Account
+      description: |
+        Permanently remove a user account from the panel.
+        
+        **Example:**
+        ```bash
+        curl -X POST "http://your-server.com/cSbuFLhp/?api_key=API-KEY&action=delete_user" \
+          -d "id=5"
+        ```
       tags: [User API]
       operationId: deleteUser
       parameters:
         - $ref: '#/components/parameters/ApiKey'
         - name: action
           in: query
-          schema: {type: string, enum: [delete_user]}
+          required: true
+          schema:
+            type: string
+            enum: [delete_user]
       requestBody:
+        required: true
         content:
           application/x-www-form-urlencoded:
             schema:
+              type: object
               required: [id]
               properties:
-                id: {type: integer, example: 5}
+                id:
+                  type: integer
+                  description: User ID to delete
+                  example: 5
       responses:
-        '200': {description: User deleted}
+        '200':
+          description: User deleted successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
 
   /?action=enable_user:
     post:
       summary: Enable User Account
+      description: |
+        Activate a disabled user account.
+        
+        **Example:**
+        ```bash
+        curl -X POST "http://your-server.com/cSbuFLhp/?api_key=API-KEY&action=enable_user" \
+          -d "id=5"
+        ```
       tags: [User API]
       operationId: enableUser
       parameters:
         - $ref: '#/components/parameters/ApiKey'
         - name: action
           in: query
-          schema: {type: string, enum: [enable_user]}
+          required: true
+          schema:
+            type: string
+            enum: [enable_user]
       requestBody:
+        required: true
         content:
           application/x-www-form-urlencoded:
             schema:
+              type: object
+              required: [id]
               properties:
-                id: {type: integer, example: 5}
+                id:
+                  type: integer
+                  description: User ID to enable
+                  example: 5
       responses:
-        '200': {description: User enabled}
+        '200':
+          description: User enabled successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
 
   /?action=disable_user:
     post:
       summary: Disable User Account
+      description: |
+        Deactivate a user account without deleting it.
+        
+        **Example:**
+        ```bash
+        curl -X POST "http://your-server.com/cSbuFLhp/?api_key=API-KEY&action=disable_user" \
+          -d "id=5"
+        ```
       tags: [User API]
       operationId: disableUser
       parameters:
         - $ref: '#/components/parameters/ApiKey'
         - name: action
           in: query
-          schema: {type: string, enum: [disable_user]}
+          required: true
+          schema:
+            type: string
+            enum: [disable_user]
       requestBody:
+        required: true
         content:
           application/x-www-form-urlencoded:
             schema:
+              type: object
+              required: [id]
               properties:
-                id: {type: integer, example: 5}
+                id:
+                  type: integer
+                  description: User ID to disable
+                  example: 5
       responses:
-        '200': {description: User disabled}
+        '200':
+          description: User disabled successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
 
   /?action=add_credits:
     post:
       summary: Add Credits to Reseller
+      description: |
+        Add credits to a reseller account for creating lines.
+        
+        **Example:**
+        ```bash
+        curl -X POST "http://your-server.com/cSbuFLhp/?api_key=API-KEY&action=add_credits" \
+          -d "user_id=5" \
+          -d "amount=100.00"
+        ```
       tags: [User API]
       operationId: addCredits
       parameters:
         - $ref: '#/components/parameters/ApiKey'
         - name: action
           in: query
-          schema: {type: string, enum: [add_credits]}
+          required: true
+          schema:
+            type: string
+            enum: [add_credits]
       requestBody:
+        required: true
         content:
           application/x-www-form-urlencoded:
             schema:
+              type: object
+              required: [user_id, amount]
               properties:
-                user_id: {type: integer, example: 5}
-                amount: {type: number, example: 100.00}
+                user_id:
+                  type: integer
+                  description: Reseller user ID
+                  example: 5
+                amount:
+                  type: number
+                  format: float
+                  description: Credits amount to add
+                  example: 100.00
+                  minimum: 0
       responses:
-        '200': {description: Credits added}
+        '200':
+          description: Credits added successfully
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/SuccessResponse'
+                  - type: object
+                    properties:
+                      data:
+                        type: object
+                        properties:
+                          new_balance:
+                            type: number
+                            description: Updated credit balance
+
 
   # ==================================================================================
   # CATEGORY 6: MAG API - MAG Device Management
@@ -1861,178 +2057,440 @@ paths:
   /?action=create_mag:
     post:
       summary: Create MAG Device
+      description: |
+        Register a new MAG device (Set-Top Box) subscription.
+        
+        **Example:**
+        ```bash
+        curl -X POST "http://your-server.com/cSbuFLhp/?api_key=API-KEY&action=create_mag" \
+          -d "mac=00:1A:79:12:34:56" \
+          -d "exp_date=2025-12-31" \
+          -d "bouquets_selected[]=1"
+        ```
       tags: [MAG API]
       operationId: createMag
       parameters:
         - $ref: '#/components/parameters/ApiKey'
         - name: action
           in: query
-          schema: {type: string, enum: [create_mag]}
+          required: true
+          schema:
+            type: string
+            enum: [create_mag]
       requestBody:
+        required: true
         content:
           application/x-www-form-urlencoded:
             schema:
+              type: object
               required: [mac]
               properties:
-                mac: {type: string, example: "00:1A:79:XX:XX:XX"}
-                exp_date: {type: string, example: "2025-12-31"}
-                bouquets_selected: {type: array, items: {type: integer}}
+                mac:
+                  type: string
+                  description: MAC address of the MAG device (format XX:XX:XX:XX:XX:XX)
+                  example: "00:1A:79:12:34:56"
+                  pattern: '^([0-9A-Fa-f]{2}[:-]){5}([0-9A-Fa-f]{2})$'
+                exp_date:
+                  type: string
+                  description: Expiration date (YYYY-MM-DD or Unix timestamp)
+                  example: "2025-12-31"
+                bouquets_selected:
+                  type: array
+                  description: Array of package/bouquet IDs to assign
+                  items:
+                    type: integer
+                  example: [1, 2, 3]
+                notes:
+                  type: string
+                  description: Admin notes about this device
+                  example: "Customer MAG322"
+                is_trial:
+                  type: integer
+                  description: Trial status (0=No, 1=Yes)
+                  enum: [0, 1]
+                  default: 0
       responses:
-        '200': {description: MAG created}
+        '200':
+          description: MAG device created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
 
   /?action=edit_mag:
     post:
       summary: Edit MAG Device
+      description: |
+        Modify settings for an existing MAG device.
+        
+        **Example:**
+        ```bash
+        curl -X POST "http://your-server.com/cSbuFLhp/?api_key=API-KEY&action=edit_mag" \
+          -d "id=202" \
+          -d "exp_date=2026-12-31"
+        ```
       tags: [MAG API]
       operationId: editMag
       parameters:
         - $ref: '#/components/parameters/ApiKey'
         - name: action
           in: query
-          schema: {type: string, enum: [edit_mag]}
+          required: true
+          schema:
+            type: string
+            enum: [edit_mag]
       requestBody:
+        required: true
         content:
           application/x-www-form-urlencoded:
             schema:
+              type: object
               required: [id]
               properties:
-                id: {type: integer, example: 202}
-                exp_date: {type: string}
+                id:
+                  type: integer
+                  description: MAG device ID
+                  example: 202
+                mac:
+                  type: string
+                  description: New MAC address
+                  example: "00:1A:79:98:76:54"
+                exp_date:
+                  type: string
+                  description: New expiration date
+                  example: "2026-12-31"
+                bouquets_selected:
+                  type: array
+                  description: Update assigned packages
+                  items:
+                    type: integer
+                  example: [1, 3]
+                notes:
+                  type: string
+                  description: Update notes
+                  example: "Renewed subscription"
       responses:
-        '200': {description: MAG updated}
+        '200':
+          description: MAG device updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
 
   /?action=delete_mag:
     post:
       summary: Delete MAG Device
+      description: |
+        Remove a MAG device from the system.
+        
+        **Example:**
+        ```bash
+        curl -X POST "http://your-server.com/cSbuFLhp/?api_key=API-KEY&action=delete_mag" \
+          -d "id=202"
+        ```
       tags: [MAG API]
       operationId: deleteMag
       parameters:
         - $ref: '#/components/parameters/ApiKey'
         - name: action
           in: query
-          schema: {type: string, enum: [delete_mag]}
+          required: true
+          schema:
+            type: string
+            enum: [delete_mag]
       requestBody:
+        required: true
         content:
           application/x-www-form-urlencoded:
             schema:
+              type: object
               required: [id]
               properties:
-                id: {type: integer, example: 202}
+                id:
+                  type: integer
+                  description: MAG device ID to delete
+                  example: 202
       responses:
-        '200': {description: MAG deleted}
+        '200':
+          description: MAG device deleted successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
 
   /?action=enable_mag:
     post:
       summary: Enable MAG Device
+      description: |
+        Activate a MAG device to allow streaming.
+        
+        **Example:**
+        ```bash
+        curl -X POST "http://your-server.com/cSbuFLhp/?api_key=API-KEY&action=enable_mag" \
+          -d "id=202"
+        ```
       tags: [MAG API]
       operationId: enableMag
       parameters:
         - $ref: '#/components/parameters/ApiKey'
         - name: action
           in: query
-          schema: {type: string, enum: [enable_mag]}
+          required: true
+          schema:
+            type: string
+            enum: [enable_mag]
       requestBody:
+        required: true
         content:
           application/x-www-form-urlencoded:
             schema:
+              type: object
+              required: [id]
               properties:
-                id: {type: integer, example: 202}
+                id:
+                  type: integer
+                  description: MAG device ID to enable
+                  example: 202
       responses:
-        '200': {description: MAG enabled}
+        '200':
+          description: MAG device enabled successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
 
   /?action=disable_mag:
     post:
       summary: Disable MAG Device
+      description: |
+        Deactivate a MAG device to prevent streaming.
+        
+        **Example:**
+        ```bash
+        curl -X POST "http://your-server.com/cSbuFLhp/?api_key=API-KEY&action=disable_mag" \
+          -d "id=202"
+        ```
       tags: [MAG API]
       operationId: disableMag
       parameters:
         - $ref: '#/components/parameters/ApiKey'
         - name: action
           in: query
-          schema: {type: string, enum: [disable_mag]}
+          required: true
+          schema:
+            type: string
+            enum: [disable_mag]
       requestBody:
+        required: true
         content:
           application/x-www-form-urlencoded:
             schema:
+              type: object
+              required: [id]
               properties:
-                id: {type: integer, example: 202}
+                id:
+                  type: integer
+                  description: MAG device ID to disable
+                  example: 202
       responses:
-        '200': {description: MAG disabled}
+        '200':
+          description: MAG device disabled successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
 
   /?action=ban_mag:
     post:
       summary: Ban MAG Device
+      description: |
+        Ban a MAG device from accessing the service.
+        
+        **Example:**
+        ```bash
+        curl -X POST "http://your-server.com/cSbuFLhp/?api_key=API-KEY&action=ban_mag" \
+          -d "id=202"
+        ```
       tags: [MAG API]
       operationId: banMag
       parameters:
         - $ref: '#/components/parameters/ApiKey'
         - name: action
           in: query
-          schema: {type: string, enum: [ban_mag]}
+          required: true
+          schema:
+            type: string
+            enum: [ban_mag]
       requestBody:
+        required: true
         content:
           application/x-www-form-urlencoded:
             schema:
+              type: object
+              required: [id]
               properties:
-                id: {type: integer, example: 202}
+                id:
+                  type: integer
+                  description: MAG device ID to ban
+                  example: 202
       responses:
-        '200': {description: MAG banned}
+        '200':
+          description: MAG device banned successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
 
   /?action=unban_mag:
     post:
       summary: Unban MAG Device
+      description: |
+        Remove ban from a MAG device.
+        
+        **Example:**
+        ```bash
+        curl -X POST "http://your-server.com/cSbuFLhp/?api_key=API-KEY&action=unban_mag" \
+          -d "id=202"
+        ```
       tags: [MAG API]
       operationId: unbanMag
       parameters:
         - $ref: '#/components/parameters/ApiKey'
         - name: action
           in: query
-          schema: {type: string, enum: [unban_mag]}
+          required: true
+          schema:
+            type: string
+            enum: [unban_mag]
       requestBody:
+        required: true
         content:
           application/x-www-form-urlencoded:
             schema:
+              type: object
+              required: [id]
               properties:
-                id: {type: integer, example: 202}
+                id:
+                  type: integer
+                  description: MAG device ID to unban
+                  example: 202
       responses:
-        '200': {description: MAG unbanned}
+        '200':
+          description: MAG device unbanned successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
 
   /?action=convert_mag_to_line:
     post:
       summary: Convert MAG to Line
-      description: Convert MAG device to M3U subscription line
+      description: |
+        Convert a MAG device subscription to an M3U/Xtream Codes line.
+        
+        **Example:**
+        ```bash
+        curl -X POST "http://your-server.com/cSbuFLhp/?api_key=API-KEY&action=convert_mag_to_line" \
+          -d "id=202"
+        ```
       tags: [MAG API]
       operationId: convertMagToLine
       parameters:
         - $ref: '#/components/parameters/ApiKey'
         - name: action
           in: query
-          schema: {type: string, enum: [convert_mag_to_line]}
+          required: true
+          schema:
+            type: string
+            enum: [convert_mag_to_line]
       requestBody:
+        required: true
         content:
           application/x-www-form-urlencoded:
             schema:
+              type: object
+              required: [id]
               properties:
-                id: {type: integer, example: 202}
+                id:
+                  type: integer
+                  description: MAG device ID to convert
+                  example: 202
       responses:
-        '200': {description: Converted to line}
+        '200':
+          description: MAG device converted to line successfully
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/SuccessResponse'
+                  - type: object
+                    properties:
+                      data:
+                        type: object
+                        properties:
+                          line_id:
+                            type: integer
+                            description: New line ID
+                          username:
+                            type: string
+                            description: Generated username
+                          password:
+                            type: string
+                            description: Generated password
 
   /?action=get_mag:
     get:
       summary: Get MAG Device Details
+      description: |
+        Retrieve detailed information about a specific MAG device.
+        
+        **Example:**
+        ```bash
+        curl "http://your-server.com/cSbuFLhp/?api_key=API-KEY&action=get_mag&id=202"
+        ```
       tags: [MAG API]
       operationId: getMag
       parameters:
         - $ref: '#/components/parameters/ApiKey'
         - name: action
           in: query
-          schema: {type: string, enum: [get_mag]}
+          required: true
+          schema:
+            type: string
+            enum: [get_mag]
         - name: id
           in: query
           required: true
-          schema: {type: integer, example: 202}
+          schema:
+            type: integer
+          description: MAG device ID
+          example: 202
       responses:
-        '200': {description: MAG details}
+        '200':
+          description: MAG device details retrieved
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/SuccessResponse'
+                  - type: object
+                    properties:
+                      data:
+                        type: object
+                        properties:
+                          id:
+                            type: integer
+                          mac:
+                            type: string
+                          exp_date:
+                            type: string
+                          status:
+                            type: string
+                          bouquets:
+                            type: array
+                            items:
+                              type: integer
+
 
   # ==================================================================================
   # CATEGORY 7: ENIGMA API - Enigma2 Device Management
@@ -2041,175 +2499,411 @@ paths:
   /?action=create_enigma:
     post:
       summary: Create Enigma2 Device
+      description: |
+        Register a new Enigma2 STB (Set-Top Box) device.
+        
+        **Example:**
+        ```bash
+        curl -X POST "http://your-server.com/cSbuFLhp/?api_key=API-KEY&action=create_enigma" \
+          -d "mac=00:1A:79:AA:BB:CC" \
+          -d "exp_date=2025-12-31" \
+          -d "bouquets_selected[]=1"
+        ```
       tags: [Enigma API]
       operationId: createEnigma
       parameters:
         - $ref: '#/components/parameters/ApiKey'
         - name: action
           in: query
-          schema: {type: string, enum: [create_enigma]}
+          required: true
+          schema:
+            type: string
+            enum: [create_enigma]
       requestBody:
+        required: true
         content:
           application/x-www-form-urlencoded:
             schema:
+              type: object
               required: [mac]
               properties:
-                mac: {type: string, example: "00:1A:79:YY:YY:YY"}
-                exp_date: {type: string, example: "2025-12-31"}
+                mac:
+                  type: string
+                  description: MAC address of Enigma2 device
+                  example: "00:1A:79:AA:BB:CC"
+                  pattern: '^([0-9A-Fa-f]{2}[:-]){5}([0-9A-Fa-f]{2})$'
+                exp_date:
+                  type: string
+                  description: Expiration date
+                  example: "2025-12-31"
+                bouquets_selected:
+                  type: array
+                  description: Package IDs
+                  items:
+                    type: integer
+                  example: [1, 2]
+                notes:
+                  type: string
+                  description: Admin notes
+                  example: "Customer Enigma2 box"
       responses:
-        '200': {description: Enigma created}
+        '200':
+          description: Enigma2 device created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
 
   /?action=edit_enigma:
     post:
       summary: Edit Enigma2 Device
+      description: |
+        Modify Enigma2 device settings.
+        
+        **Example:**
+        ```bash
+        curl -X POST "http://your-server.com/cSbuFLhp/?api_key=API-KEY&action=edit_enigma" \
+          -d "id=303" \
+          -d "exp_date=2026-06-30"
+        ```
       tags: [Enigma API]
       operationId: editEnigma
       parameters:
         - $ref: '#/components/parameters/ApiKey'
         - name: action
           in: query
-          schema: {type: string, enum: [edit_enigma]}
+          required: true
+          schema:
+            type: string
+            enum: [edit_enigma]
       requestBody:
+        required: true
         content:
           application/x-www-form-urlencoded:
             schema:
+              type: object
               required: [id]
               properties:
-                id: {type: integer, example: 303}
+                id:
+                  type: integer
+                  description: Enigma2 device ID
+                  example: 303
+                mac:
+                  type: string
+                  description: New MAC address
+                  example: "00:1A:79:DD:EE:FF"
+                exp_date:
+                  type: string
+                  description: New expiration date
+                  example: "2026-06-30"
+                bouquets_selected:
+                  type: array
+                  items:
+                    type: integer
+                  example: [2, 3]
       responses:
-        '200': {description: Enigma updated}
+        '200':
+          description: Enigma2 device updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
 
   /?action=delete_enigma:
     post:
       summary: Delete Enigma2 Device
+      description: |
+        Remove an Enigma2 device.
+        
+        **Example:**
+        ```bash
+        curl -X POST "http://your-server.com/cSbuFLhp/?api_key=API-KEY&action=delete_enigma" \
+          -d "id=303"
+        ```
       tags: [Enigma API]
       operationId: deleteEnigma
       parameters:
         - $ref: '#/components/parameters/ApiKey'
         - name: action
           in: query
-          schema: {type: string, enum: [delete_enigma]}
+          required: true
+          schema:
+            type: string
+            enum: [delete_enigma]
       requestBody:
+        required: true
         content:
           application/x-www-form-urlencoded:
             schema:
+              type: object
               required: [id]
               properties:
-                id: {type: integer, example: 303}
+                id:
+                  type: integer
+                  description: Enigma2 device ID
+                  example: 303
       responses:
-        '200': {description: Enigma deleted}
+        '200':
+          description: Enigma2 device deleted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
 
   /?action=enable_enigma:
     post:
       summary: Enable Enigma2 Device
+      description: |
+        Activate an Enigma2 device.
+        
+        **Example:**
+        ```bash
+        curl -X POST "http://your-server.com/cSbuFLhp/?api_key=API-KEY&action=enable_enigma" \
+          -d "id=303"
+        ```
       tags: [Enigma API]
       operationId: enableEnigma
       parameters:
         - $ref: '#/components/parameters/ApiKey'
         - name: action
           in: query
-          schema: {type: string, enum: [enable_enigma]}
+          required: true
+          schema:
+            type: string
+            enum: [enable_enigma]
       requestBody:
+        required: true
         content:
           application/x-www-form-urlencoded:
             schema:
+              type: object
+              required: [id]
               properties:
-                id: {type: integer, example: 303}
+                id:
+                  type: integer
+                  description: Enigma2 device ID
+                  example: 303
       responses:
-        '200': {description: Enigma enabled}
+        '200':
+          description: Enigma2 device enabled
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
 
   /?action=disable_enigma:
     post:
       summary: Disable Enigma2 Device
+      description: |
+        Deactivate an Enigma2 device.
+        
+        **Example:**
+        ```bash
+        curl -X POST "http://your-server.com/cSbuFLhp/?api_key=API-KEY&action=disable_enigma" \
+          -d "id=303"
+        ```
       tags: [Enigma API]
       operationId: disableEnigma
       parameters:
         - $ref: '#/components/parameters/ApiKey'
         - name: action
           in: query
-          schema: {type: string, enum: [disable_enigma]}
+          required: true
+          schema:
+            type: string
+            enum: [disable_enigma]
       requestBody:
+        required: true
         content:
           application/x-www-form-urlencoded:
             schema:
+              type: object
+              required: [id]
               properties:
-                id: {type: integer, example: 303}
+                id:
+                  type: integer
+                  description: Enigma2 device ID
+                  example: 303
       responses:
-        '200': {description: Enigma disabled}
+        '200':
+          description: Enigma2 device disabled
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
 
   /?action=ban_enigma:
     post:
       summary: Ban Enigma2 Device
+      description: |
+        Ban an Enigma2 device.
+        
+        **Example:**
+        ```bash
+        curl -X POST "http://your-server.com/cSbuFLhp/?api_key=API-KEY&action=ban_enigma" \
+          -d "id=303"
+        ```
       tags: [Enigma API]
       operationId: banEnigma
       parameters:
         - $ref: '#/components/parameters/ApiKey'
         - name: action
           in: query
-          schema: {type: string, enum: [ban_enigma]}
+          required: true
+          schema:
+            type: string
+            enum: [ban_enigma]
       requestBody:
+        required: true
         content:
           application/x-www-form-urlencoded:
             schema:
+              type: object
+              required: [id]
               properties:
-                id: {type: integer, example: 303}
+                id:
+                  type: integer
+                  description: Enigma2 device ID
+                  example: 303
       responses:
-        '200': {description: Enigma banned}
+        '200':
+          description: Enigma2 device banned
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
 
   /?action=unban_enigma:
     post:
       summary: Unban Enigma2 Device
+      description: |
+        Remove ban from Enigma2 device.
+        
+        **Example:**
+        ```bash
+        curl -X POST "http://your-server.com/cSbuFLhp/?api_key=API-KEY&action=unban_enigma" \
+          -d "id=303"
+        ```
       tags: [Enigma API]
       operationId: unbanEnigma
       parameters:
         - $ref: '#/components/parameters/ApiKey'
         - name: action
           in: query
-          schema: {type: string, enum: [unban_enigma]}
+          required: true
+          schema:
+            type: string
+            enum: [unban_enigma]
       requestBody:
+        required: true
         content:
           application/x-www-form-urlencoded:
             schema:
+              type: object
+              required: [id]
               properties:
-                id: {type: integer, example: 303}
+                id:
+                  type: integer
+                  description: Enigma2 device ID
+                  example: 303
       responses:
-        '200': {description: Enigma unbanned}
+        '200':
+          description: Enigma2 device unbanned
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
 
   /?action=convert_enigma_to_line:
     post:
       summary: Convert Enigma to Line
+      description: |
+        Convert Enigma2 device to M3U line.
+        
+        **Example:**
+        ```bash
+        curl -X POST "http://your-server.com/cSbuFLhp/?api_key=API-KEY&action=convert_enigma_to_line" \
+          -d "id=303"
+        ```
       tags: [Enigma API]
       operationId: convertEnigmaToLine
       parameters:
         - $ref: '#/components/parameters/ApiKey'
         - name: action
           in: query
-          schema: {type: string, enum: [convert_enigma_to_line]}
+          required: true
+          schema:
+            type: string
+            enum: [convert_enigma_to_line]
       requestBody:
+        required: true
         content:
           application/x-www-form-urlencoded:
             schema:
+              type: object
+              required: [id]
               properties:
-                id: {type: integer, example: 303}
+                id:
+                  type: integer
+                  description: Enigma2 device ID
+                  example: 303
       responses:
-        '200': {description: Converted to line}
+        '200':
+          description: Converted successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
 
   /?action=get_enigma:
     get:
       summary: Get Enigma2 Details
+      description: |
+        Retrieve Enigma2 device information.
+        
+        **Example:**
+        ```bash
+        curl "http://your-server.com/cSbuFLhp/?api_key=API-KEY&action=get_enigma&id=303"
+        ```
       tags: [Enigma API]
       operationId: getEnigma
       parameters:
         - $ref: '#/components/parameters/ApiKey'
         - name: action
           in: query
-          schema: {type: string, enum: [get_enigma]}
+          required: true
+          schema:
+            type: string
+            enum: [get_enigma]
         - name: id
           in: query
           required: true
-          schema: {type: integer, example: 303}
+          schema:
+            type: integer
+          description: Enigma2 device ID
+          example: 303
       responses:
-        '200': {description: Enigma details}
+        '200':
+          description: Enigma2 details retrieved
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/SuccessResponse'
+                  - type: object
+                    properties:
+                      data:
+                        type: object
+                        properties:
+                          id:
+                            type: integer
+                          mac:
+                            type: string
+                          exp_date:
+                            type: string
+                          status:
+                            type: string
+
 
   # ==================================================================================
   # CATEGORY 8-15: CONTENT & SYSTEM MANAGEMENT (Compact format)
@@ -2219,212 +2913,2346 @@ paths:
   /?action=create_stream:
     post:
       summary: Create Live Stream
+      description: |
+        Add a new live TV stream to your panel.
+        
+        **Example:**
+        ```bash
+        curl -X POST "http://your-server.com/cSbuFLhp/?api_key=API-KEY&action=create_stream" \
+          -d "stream_display_name=CNN HD" \
+          -d "stream_source=http://source.com/stream.m3u8" \
+          -d "category_id=1"
+        ```
       tags: [Streams API]
       operationId: createStream
-      parameters: [{$ref: '#/components/parameters/ApiKey'}, {name: action, in: query, schema: {type: string, enum: [create_stream]}}]
-      requestBody: {content: {application/x-www-form-urlencoded: {schema: {required: [stream_display_name, stream_source], properties: {stream_display_name: {type: string, example: "CNN HD"}, stream_source: {type: string, example: "http://source.com/stream.m3u8"}, category_id: {type: integer, example: 1}}}}}}
-      responses: {'200': {description: Stream created}}
+      parameters:
+        - $ref: '#/components/parameters/ApiKey'
+        - name: action
+          in: query
+          required: true
+          schema:
+            type: string
+            enum: [create_stream]
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              required: [stream_display_name, stream_source]
+              properties:
+                stream_display_name:
+                  type: string
+                  description: Display name for the stream
+                  example: "CNN HD"
+                stream_source:
+                  type: string
+                  description: Stream URL source
+                  example: "http://source.com/stream.m3u8"
+                category_id:
+                  type: integer
+                  description: Category ID for organization
+                  example: 1
+                stream_icon:
+                  type: string
+                  description: URL to stream logo/icon
+                  example: "http://example.com/cnn.png"
+                notes:
+                  type: string
+                  description: Admin notes
+                  example: "Main news channel"
+      responses:
+        '200':
+          description: Stream created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
 
   /?action=edit_stream:
     post:
       summary: Edit Live Stream
+      description: |
+        Modify an existing live stream.
+        
+        **Example:**
+        ```bash
+        curl -X POST "http://your-server.com/cSbuFLhp/?api_key=API-KEY&action=edit_stream" \
+          -d "id=456" \
+          -d "stream_display_name=CNN HD Updated"
+        ```
       tags: [Streams API]
       operationId: editStream
-      parameters: [{$ref: '#/components/parameters/ApiKey'}, {name: action, in: query, schema: {type: string, enum: [edit_stream]}}]
-      requestBody: {content: {application/x-www-form-urlencoded: {schema: {required: [id], properties: {id: {type: integer, example: 456}}}}}}
-      responses: {'200': {description: Stream updated}}
+      parameters:
+        - $ref: '#/components/parameters/ApiKey'
+        - name: action
+          in: query
+          required: true
+          schema:
+            type: string
+            enum: [edit_stream]
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              required: [id]
+              properties:
+                id:
+                  type: integer
+                  description: Stream ID to edit
+                  example: 456
+                stream_display_name:
+                  type: string
+                  description: New display name
+                  example: "CNN HD Updated"
+                stream_source:
+                  type: string
+                  description: New stream URL
+                  example: "http://newsource.com/stream.m3u8"
+                category_id:
+                  type: integer
+                  description: New category ID
+                  example: 2
+                stream_icon:
+                  type: string
+                  description: New icon URL
+                  example: "http://example.com/cnn_new.png"
+      responses:
+        '200':
+          description: Stream updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
 
   /?action=delete_stream:
     post:
       summary: Delete Live Stream
+      description: |
+        Remove a live stream from your panel.
+        
+        **Example:**
+        ```bash
+        curl -X POST "http://your-server.com/cSbuFLhp/?api_key=API-KEY&action=delete_stream" \
+          -d "id=456"
+        ```
       tags: [Streams API]
       operationId: deleteStream
-      parameters: [{$ref: '#/components/parameters/ApiKey'}, {name: action, in: query, schema: {type: string, enum: [delete_stream]}}]
-      requestBody: {content: {application/x-www-form-urlencoded: {schema: {required: [id], properties: {id: {type: integer, example: 456}}}}}}
-      responses: {'200': {description: Stream deleted}}
+      parameters:
+        - $ref: '#/components/parameters/ApiKey'
+        - name: action
+          in: query
+          required: true
+          schema:
+            type: string
+            enum: [delete_stream]
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              required: [id]
+              properties:
+                id:
+                  type: integer
+                  description: Stream ID to delete
+                  example: 456
+      responses:
+        '200':
+          description: Stream deleted successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
 
   /?action=start_stream:
     post:
       summary: Start Stream
+      description: |
+        Start streaming for a specific stream.
+        
+        **Example:**
+        ```bash
+        curl -X POST "http://your-server.com/cSbuFLhp/?api_key=API-KEY&action=start_stream" \
+          -d "id=456"
+        ```
       tags: [Streams API]
       operationId: startStream
-      parameters: [{$ref: '#/components/parameters/ApiKey'}, {name: action, in: query, schema: {type: string, enum: [start_stream]}}]
-      requestBody: {content: {application/x-www-form-urlencoded: {schema: {properties: {id: {type: integer, example: 456}}}}}}
-      responses: {'200': {description: Stream started}}
+      parameters:
+        - $ref: '#/components/parameters/ApiKey'
+        - name: action
+          in: query
+          required: true
+          schema:
+            type: string
+            enum: [start_stream]
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              required: [id]
+              properties:
+                id:
+                  type: integer
+                  description: Stream ID to start
+                  example: 456
+      responses:
+        '200':
+          description: Stream started successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
 
   /?action=stop_stream:
     post:
       summary: Stop Stream
+      description: |
+        Stop streaming for a specific stream.
+        
+        **Example:**
+        ```bash
+        curl -X POST "http://your-server.com/cSbuFLhp/?api_key=API-KEY&action=stop_stream" \
+          -d "id=456"
+        ```
       tags: [Streams API]
       operationId: stopStream
-      parameters: [{$ref: '#/components/parameters/ApiKey'}, {name: action, in: query, schema: {type: string, enum: [stop_stream]}}]
-      requestBody: {content: {application/x-www-form-urlencoded: {schema: {properties: {id: {type: integer, example: 456}}}}}}
-      responses: {'200': {description: Stream stopped}}
+      parameters:
+        - $ref: '#/components/parameters/ApiKey'
+        - name: action
+          in: query
+          required: true
+          schema:
+            type: string
+            enum: [stop_stream]
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              required: [id]
+              properties:
+                id:
+                  type: integer
+                  description: Stream ID to stop
+                  example: 456
+      responses:
+        '200':
+          description: Stream stopped successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
 
   /?action=get_stream:
     get:
       summary: Get Stream Details
+      description: |
+        Retrieve detailed information about a specific stream.
+        
+        **Example:**
+        ```bash
+        curl "http://your-server.com/cSbuFLhp/?api_key=API-KEY&action=get_stream&id=456"
+        ```
       tags: [Streams API]
       operationId: getStream
-      parameters: [{$ref: '#/components/parameters/ApiKey'}, {name: action, in: query, schema: {type: string, enum: [get_stream]}}, {name: id, in: query, required: true, schema: {type: integer, example: 456}}]
-      responses: {'200': {description: Stream details}}
+      parameters:
+        - $ref: '#/components/parameters/ApiKey'
+        - name: action
+          in: query
+          required: true
+          schema:
+            type: string
+            enum: [get_stream]
+        - name: id
+          in: query
+          required: true
+          schema:
+            type: integer
+          description: Stream ID
+          example: 456
+      responses:
+        '200':
+          description: Stream details retrieved
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/SuccessResponse'
+                  - type: object
+                    properties:
+                      data:
+                        type: object
+                        properties:
+                          id:
+                            type: integer
+                          stream_display_name:
+                            type: string
+                          stream_source:
+                            type: string
+                          category_id:
+                            type: integer
+
 
   # Channel API
   /?action=create_channel:
-    post: {summary: Create Channel, tags: [Channel API], operationId: createChannel, parameters: [{$ref: '#/components/parameters/ApiKey'}, {name: action, in: query, schema: {type: string, enum: [create_channel]}}], responses: {'200': {description: Channel created}}}
+    post:
+      summary: Create Channel
+      description: |
+        Add a new TV channel category or group.
+        
+        **Example:**
+        ```bash
+        curl -X POST "http://your-server.com/cSbuFLhp/?api_key=API-KEY&action=create_channel" \
+          -d "category_name=Sports Channels" \
+          -d "parent_id=0"
+        ```
+      tags: [Channel API]
+      operationId: createChannel
+      parameters:
+        - $ref: '#/components/parameters/ApiKey'
+        - name: action
+          in: query
+          required: true
+          schema:
+            type: string
+            enum: [create_channel]
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              required: [category_name]
+              properties:
+                category_name:
+                  type: string
+                  description: Channel category name
+                  example: "Sports Channels"
+                parent_id:
+                  type: integer
+                  description: Parent category ID (0 for root)
+                  default: 0
+                  example: 0
+      responses:
+        '200':
+          description: Channel created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
 
   /?action=edit_channel:
-    post: {summary: Edit Channel, tags: [Channel API], operationId: editChannel, parameters: [{$ref: '#/components/parameters/ApiKey'}, {name: action, in: query, schema: {type: string, enum: [edit_channel]}}], responses: {'200': {description: Channel updated}}}
+    post:
+      summary: Edit Channel
+      description: |
+        Modify channel category settings.
+        
+        **Example:**
+        ```bash
+        curl -X POST "http://your-server.com/cSbuFLhp/?api_key=API-KEY&action=edit_channel" \
+          -d "id=5" \
+          -d "category_name=Premium Sports"
+        ```
+      tags: [Channel API]
+      operationId: editChannel
+      parameters:
+        - $ref: '#/components/parameters/ApiKey'
+        - name: action
+          in: query
+          required: true
+          schema:
+            type: string
+            enum: [edit_channel]
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              required: [id]
+              properties:
+                id:
+                  type: integer
+                  description: Channel ID
+                  example: 5
+                category_name:
+                  type: string
+                  description: New category name
+                  example: "Premium Sports"
+                parent_id:
+                  type: integer
+                  description: New parent category
+                  example: 1
+      responses:
+        '200':
+          description: Channel updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
 
   /?action=delete_channel:
-    post: {summary: Delete Channel, tags: [Channel API], operationId: deleteChannel, parameters: [{$ref: '#/components/parameters/ApiKey'}, {name: action, in: query, schema: {type: string, enum: [delete_channel]}}], responses: {'200': {description: Channel deleted}}}
+    post:
+      summary: Delete Channel
+      description: |
+        Remove a channel category.
+        
+        **Example:**
+        ```bash
+        curl -X POST "http://your-server.com/cSbuFLhp/?api_key=API-KEY&action=delete_channel" \
+          -d "id=5"
+        ```
+      tags: [Channel API]
+      operationId: deleteChannel
+      parameters:
+        - $ref: '#/components/parameters/ApiKey'
+        - name: action
+          in: query
+          required: true
+          schema:
+            type: string
+            enum: [delete_channel]
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              required: [id]
+              properties:
+                id:
+                  type: integer
+                  description: Channel ID
+                  example: 5
+      responses:
+        '200':
+          description: Channel deleted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
 
   /?action=enable_channel:
-    post: {summary: Enable Channel, tags: [Channel API], operationId: enableChannel, parameters: [{$ref: '#/components/parameters/ApiKey'}, {name: action, in: query, schema: {type: string, enum: [enable_channel]}}], responses: {'200': {description: Channel enabled}}}
+    post:
+      summary: Enable Channel
+      description: Activate a channel category
+      tags: [Channel API]
+      operationId: enableChannel
+      parameters:
+        - $ref: '#/components/parameters/ApiKey'
+        - name: action
+          in: query
+          required: true
+          schema:
+            type: string
+            enum: [enable_channel]
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              required: [id]
+              properties:
+                id:
+                  type: integer
+                  example: 5
+      responses:
+        '200':
+          description: Channel enabled
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
 
   /?action=disable_channel:
-    post: {summary: Disable Channel, tags: [Channel API], operationId: disableChannel, parameters: [{$ref: '#/components/parameters/ApiKey'}, {name: action, in: query, schema: {type: string, enum: [disable_channel]}}], responses: {'200': {description: Channel disabled}}}
+    post:
+      summary: Disable Channel
+      description: Deactivate a channel category
+      tags: [Channel API]
+      operationId: disableChannel
+      parameters:
+        - $ref: '#/components/parameters/ApiKey'
+        - name: action
+          in: query
+          required: true
+          schema:
+            type: string
+            enum: [disable_channel]
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              required: [id]
+              properties:
+                id:
+                  type: integer
+                  example: 5
+      responses:
+        '200':
+          description: Channel disabled
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
 
   /?action=get_channel:
-    get: {summary: Get Channel Details, tags: [Channel API], operationId: getChannel, parameters: [{$ref: '#/components/parameters/ApiKey'}, {name: action, in: query, schema: {type: string, enum: [get_channel]}}], responses: {'200': {description: Channel details}}}
+    get:
+      summary: Get Channel Details
+      description: Retrieve channel category information
+      tags: [Channel API]
+      operationId: getChannel
+      parameters:
+        - $ref: '#/components/parameters/ApiKey'
+        - name: action
+          in: query
+          required: true
+          schema:
+            type: string
+            enum: [get_channel]
+        - name: id
+          in: query
+          required: true
+          schema:
+            type: integer
+          example: 5
+      responses:
+        '200':
+          description: Channel details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
 
   # Station API
   /?action=create_station:
-    post: {summary: Create Radio Station, tags: [Station API], operationId: createStation, parameters: [{$ref: '#/components/parameters/ApiKey'}, {name: action, in: query, schema: {type: string, enum: [create_station]}}], responses: {'200': {description: Station created}}}
+    post:
+      summary: Create Radio Station
+      description: |
+        Add a new radio station to your panel.
+        
+        **Example:**
+        ```bash
+        curl -X POST "http://your-server.com/cSbuFLhp/?api_key=API-KEY&action=create_station" \
+          -d "name=Rock FM 101.5" \
+          -d "stream_url=http://stream.rockfm.com/live" \
+          -d "category_id=3"
+        ```
+      tags: [Station API]
+      operationId: createStation
+      parameters:
+        - $ref: '#/components/parameters/ApiKey'
+        - name: action
+          in: query
+          required: true
+          schema:
+            type: string
+            enum: [create_station]
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              required: [name, stream_url]
+              properties:
+                name:
+                  type: string
+                  description: Radio station name
+                  example: "Rock FM 101.5"
+                stream_url:
+                  type: string
+                  description: Stream URL
+                  example: "http://stream.rockfm.com/live"
+                category_id:
+                  type: integer
+                  description: Category ID
+                  example: 3
+                icon:
+                  type: string
+                  description: Station logo URL
+                  example: "http://example.com/rockfm.png"
+      responses:
+        '200':
+          description: Station created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
 
   /?action=edit_station:
-    post: {summary: Edit Radio Station, tags: [Station API], operationId: editStation, parameters: [{$ref: '#/components/parameters/ApiKey'}, {name: action, in: query, schema: {type: string, enum: [edit_station]}}], responses: {'200': {description: Station updated}}}
+    post:
+      summary: Edit Radio Station
+      description: Modify radio station settings
+      tags: [Station API]
+      operationId: editStation
+      parameters:
+        - $ref: '#/components/parameters/ApiKey'
+        - name: action
+          in: query
+          required: true
+          schema:
+            type: string
+            enum: [edit_station]
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              required: [id]
+              properties:
+                id:
+                  type: integer
+                  example: 10
+                name:
+                  type: string
+                  example: "Rock FM Updated"
+                stream_url:
+                  type: string
+                  example: "http://newstream.rockfm.com/live"
+      responses:
+        '200':
+          description: Station updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
 
   /?action=delete_station:
-    post: {summary: Delete Radio Station, tags: [Station API], operationId: deleteStation, parameters: [{$ref: '#/components/parameters/ApiKey'}, {name: action, in: query, schema: {type: string, enum: [delete_station]}}], responses: {'200': {description: Station deleted}}}
+    post:
+      summary: Delete Radio Station
+      description: Remove a radio station
+      tags: [Station API]
+      operationId: deleteStation
+      parameters:
+        - $ref: '#/components/parameters/ApiKey'
+        - name: action
+          in: query
+          required: true
+          schema:
+            type: string
+            enum: [delete_station]
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              required: [id]
+              properties:
+                id:
+                  type: integer
+                  example: 10
+      responses:
+        '200':
+          description: Station deleted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
 
   /?action=enable_station:
-    post: {summary: Enable Radio Station, tags: [Station API], operationId: enableStation, parameters: [{$ref: '#/components/parameters/ApiKey'}, {name: action, in: query, schema: {type: string, enum: [enable_station]}}], responses: {'200': {description: Station enabled}}}
+    post:
+      summary: Enable Radio Station
+      description: Activate a radio station
+      tags: [Station API]
+      operationId: enableStation
+      parameters:
+        - $ref: '#/components/parameters/ApiKey'
+        - name: action
+          in: query
+          required: true
+          schema:
+            type: string
+            enum: [enable_station]
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              required: [id]
+              properties:
+                id:
+                  type: integer
+                  example: 10
+      responses:
+        '200':
+          description: Station enabled
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
 
   /?action=disable_station:
-    post: {summary: Disable Radio Station, tags: [Station API], operationId: disableStation, parameters: [{$ref: '#/components/parameters/ApiKey'}, {name: action, in: query, schema: {type: string, enum: [disable_station]}}], responses: {'200': {description: Station disabled}}}
+    post:
+      summary: Disable Radio Station
+      description: Deactivate a radio station
+      tags: [Station API]
+      operationId: disableStation
+      parameters:
+        - $ref: '#/components/parameters/ApiKey'
+        - name: action
+          in: query
+          required: true
+          schema:
+            type: string
+            enum: [disable_station]
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              required: [id]
+              properties:
+                id:
+                  type: integer
+                  example: 10
+      responses:
+        '200':
+          description: Station disabled
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
 
   /?action=get_station:
-    get: {summary: Get Radio Station Details, tags: [Station API], operationId: getStation, parameters: [{$ref: '#/components/parameters/ApiKey'}, {name: action, in: query, schema: {type: string, enum: [get_station]}}], responses: {'200': {description: Station details}}}
+    get:
+      summary: Get Radio Station Details
+      description: Retrieve radio station information
+      tags: [Station API]
+      operationId: getStation
+      parameters:
+        - $ref: '#/components/parameters/ApiKey'
+        - name: action
+          in: query
+          required: true
+          schema:
+            type: string
+            enum: [get_station]
+        - name: id
+          in: query
+          required: true
+          schema:
+            type: integer
+          example: 10
+      responses:
+        '200':
+          description: Station details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
 
   # Movie API
   /?action=create_movie:
-    post: {summary: Create VOD Movie, tags: [Movie API], operationId: createMovie, parameters: [{$ref: '#/components/parameters/ApiKey'}, {name: action, in: query, schema: {type: string, enum: [create_movie]}}], responses: {'200': {description: Movie created}}}
+    post:
+      summary: Create VOD Movie
+      description: |
+        Add a new VOD movie to your library.
+        
+        **Example:**
+        ```bash
+        curl -X POST "http://your-server.com/cSbuFLhp/?api_key=API-KEY&action=create_movie" \
+          -d "name=Inception" \
+          -d "stream_url=http://cdn.example.com/inception.mp4" \
+          -d "category_id=1" \
+          -d "tmdb_id=27205"
+        ```
+      tags: [Movie API]
+      operationId: createMovie
+      parameters:
+        - $ref: '#/components/parameters/ApiKey'
+        - name: action
+          in: query
+          required: true
+          schema:
+            type: string
+            enum: [create_movie]
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              required: [name, stream_url]
+              properties:
+                name:
+                  type: string
+                  description: Movie title
+                  example: "Inception"
+                stream_url:
+                  type: string
+                  description: VOD file URL
+                  example: "http://cdn.example.com/inception.mp4"
+                category_id:
+                  type: integer
+                  description: Category ID
+                  example: 1
+                tmdb_id:
+                  type: integer
+                  description: TMDB ID for metadata
+                  example: 27205
+                cover:
+                  type: string
+                  description: Cover image URL
+                  example: "http://image.tmdb.org/poster.jpg"
+                rating:
+                  type: number
+                  description: Movie rating (0-10)
+                  example: 8.8
+      responses:
+        '200':
+          description: Movie created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
 
   /?action=edit_movie:
-    post: {summary: Edit VOD Movie, tags: [Movie API], operationId: editMovie, parameters: [{$ref: '#/components/parameters/ApiKey'}, {name: action, in: query, schema: {type: string, enum: [edit_movie]}}], responses: {'200': {description: Movie updated}}}
+    post:
+      summary: Edit VOD Movie
+      description: Modify movie details
+      tags: [Movie API]
+      operationId: editMovie
+      parameters:
+        - $ref: '#/components/parameters/ApiKey'
+        - name: action
+          in: query
+          required: true
+          schema:
+            type: string
+            enum: [edit_movie]
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              required: [id]
+              properties:
+                id:
+                  type: integer
+                  example: 100
+                name:
+                  type: string
+                  example: "Inception (2010)"
+                stream_url:
+                  type: string
+                  example: "http://cdn.example.com/inception_hd.mp4"
+      responses:
+        '200':
+          description: Movie updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
 
   /?action=delete_movie:
-    post: {summary: Delete VOD Movie, tags: [Movie API], operationId: deleteMovie, parameters: [{$ref: '#/components/parameters/ApiKey'}, {name: action, in: query, schema: {type: string, enum: [delete_movie]}}], responses: {'200': {description: Movie deleted}}}
+    post:
+      summary: Delete VOD Movie
+      description: Remove a movie from library
+      tags: [Movie API]
+      operationId: deleteMovie
+      parameters:
+        - $ref: '#/components/parameters/ApiKey'
+        - name: action
+          in: query
+          required: true
+          schema:
+            type: string
+            enum: [delete_movie]
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              required: [id]
+              properties:
+                id:
+                  type: integer
+                  example: 100
+      responses:
+        '200':
+          description: Movie deleted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
 
   /?action=enable_movie:
-    post: {summary: Enable VOD Movie, tags: [Movie API], operationId: enableMovie, parameters: [{$ref: '#/components/parameters/ApiKey'}, {name: action, in: query, schema: {type: string, enum: [enable_movie]}}], responses: {'200': {description: Movie enabled}}}
+    post:
+      summary: Enable VOD Movie
+      description: Activate a movie
+      tags: [Movie API]
+      operationId: enableMovie
+      parameters:
+        - $ref: '#/components/parameters/ApiKey'
+        - name: action
+          in: query
+          required: true
+          schema:
+            type: string
+            enum: [enable_movie]
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              required: [id]
+              properties:
+                id:
+                  type: integer
+                  example: 100
+      responses:
+        '200':
+          description: Movie enabled
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
 
   /?action=disable_movie:
-    post: {summary: Disable VOD Movie, tags: [Movie API], operationId: disableMovie, parameters: [{$ref: '#/components/parameters/ApiKey'}, {name: action, in: query, schema: {type: string, enum: [disable_movie]}}], responses: {'200': {description: Movie disabled}}}
+    post:
+      summary: Disable VOD Movie
+      description: Deactivate a movie
+      tags: [Movie API]
+      operationId: disableMovie
+      parameters:
+        - $ref: '#/components/parameters/ApiKey'
+        - name: action
+          in: query
+          required: true
+          schema:
+            type: string
+            enum: [disable_movie]
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              required: [id]
+              properties:
+                id:
+                  type: integer
+                  example: 100
+      responses:
+        '200':
+          description: Movie disabled
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
 
   /?action=get_movie:
-    get: {summary: Get VOD Movie Details, tags: [Movie API], operationId: getMovie, parameters: [{$ref: '#/components/parameters/ApiKey'}, {name: action, in: query, schema: {type: string, enum: [get_movie]}}], responses: {'200': {description: Movie details}}}
+    get:
+      summary: Get VOD Movie Details
+      description: Retrieve movie information
+      tags: [Movie API]
+      operationId: getMovie
+      parameters:
+        - $ref: '#/components/parameters/ApiKey'
+        - name: action
+          in: query
+          required: true
+          schema:
+            type: string
+            enum: [get_movie]
+        - name: id
+          in: query
+          required: true
+          schema:
+            type: integer
+          example: 100
+      responses:
+        '200':
+          description: Movie details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
 
   # Series API
   /?action=create_series:
-    post: {summary: Create TV Series, tags: [Series API], operationId: createSeries, parameters: [{$ref: '#/components/parameters/ApiKey'}, {name: action, in: query, schema: {type: string, enum: [create_series]}}], responses: {'200': {description: Series created}}}
+    post:
+      summary: Create TV Series
+      description: |
+        Add a new TV series to your library.
+        
+        **Example:**
+        ```bash
+        curl -X POST "http://your-server.com/cSbuFLhp/?api_key=API-KEY&action=create_series" \
+          -d "name=Breaking Bad" \
+          -d "category_id=2" \
+          -d "tmdb_id=1396"
+        ```
+      tags: [Series API]
+      operationId: createSeries
+      parameters:
+        - $ref: '#/components/parameters/ApiKey'
+        - name: action
+          in: query
+          required: true
+          schema:
+            type: string
+            enum: [create_series]
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              required: [name]
+              properties:
+                name:
+                  type: string
+                  description: Series name
+                  example: "Breaking Bad"
+                category_id:
+                  type: integer
+                  description: Category ID
+                  example: 2
+                tmdb_id:
+                  type: integer
+                  description: TMDB ID
+                  example: 1396
+                cover:
+                  type: string
+                  description: Cover image
+                  example: "http://image.tmdb.org/series.jpg"
+      responses:
+        '200':
+          description: Series created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
 
   /?action=edit_series:
-    post: {summary: Edit TV Series, tags: [Series API], operationId: editSeries, parameters: [{$ref: '#/components/parameters/ApiKey'}, {name: action, in: query, schema: {type: string, enum: [edit_series]}}], responses: {'200': {description: Series updated}}}
+    post:
+      summary: Edit TV Series
+      description: Modify series details
+      tags: [Series API]
+      operationId: editSeries
+      parameters:
+        - $ref: '#/components/parameters/ApiKey'
+        - name: action
+          in: query
+          required: true
+          schema:
+            type: string
+            enum: [edit_series]
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              required: [id]
+              properties:
+                id:
+                  type: integer
+                  example: 50
+                name:
+                  type: string
+                  example: "Breaking Bad (Updated)"
+      responses:
+        '200':
+          description: Series updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
 
   /?action=delete_series:
-    post: {summary: Delete TV Series, tags: [Series API], operationId: deleteSeries, parameters: [{$ref: '#/components/parameters/ApiKey'}, {name: action, in: query, schema: {type: string, enum: [delete_series]}}], responses: {'200': {description: Series deleted}}}
+    post:
+      summary: Delete TV Series
+      description: Remove a series
+      tags: [Series API]
+      operationId: deleteSeries
+      parameters:
+        - $ref: '#/components/parameters/ApiKey'
+        - name: action
+          in: query
+          required: true
+          schema:
+            type: string
+            enum: [delete_series]
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              required: [id]
+              properties:
+                id:
+                  type: integer
+                  example: 50
+      responses:
+        '200':
+          description: Series deleted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
 
   /?action=get_series:
-    get: {summary: Get TV Series Details, tags: [Series API], operationId: getSeries, parameters: [{$ref: '#/components/parameters/ApiKey'}, {name: action, in: query, schema: {type: string, enum: [get_series]}}], responses: {'200': {description: Series details}}}
+    get:
+      summary: Get TV Series Details
+      description: Retrieve series information
+      tags: [Series API]
+      operationId: getSeries
+      parameters:
+        - $ref: '#/components/parameters/ApiKey'
+        - name: action
+          in: query
+          required: true
+          schema:
+            type: string
+            enum: [get_series]
+        - name: id
+          in: query
+          required: true
+          schema:
+            type: integer
+          example: 50
+      responses:
+        '200':
+          description: Series details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
 
   # Episode API
   /?action=create_episode:
-    post: {summary: Create Episode, tags: [Episode API], operationId: createEpisode, parameters: [{$ref: '#/components/parameters/ApiKey'}, {name: action, in: query, schema: {type: string, enum: [create_episode]}}], responses: {'200': {description: Episode created}}}
+    post:
+      summary: Create Episode
+      description: |
+        Add a new episode to a TV series.
+        
+        **Example:**
+        ```bash
+        curl -X POST "http://your-server.com/cSbuFLhp/?api_key=API-KEY&action=create_episode" \
+          -d "series_id=50" \
+          -d "season_num=1" \
+          -d "episode_num=1" \
+          -d "title=Pilot" \
+          -d "stream_url=http://cdn.example.com/bb_s01e01.mp4"
+        ```
+      tags: [Episode API]
+      operationId: createEpisode
+      parameters:
+        - $ref: '#/components/parameters/ApiKey'
+        - name: action
+          in: query
+          required: true
+          schema:
+            type: string
+            enum: [create_episode]
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              required: [series_id, season_num, episode_num, stream_url]
+              properties:
+                series_id:
+                  type: integer
+                  description: Parent series ID
+                  example: 50
+                season_num:
+                  type: integer
+                  description: Season number
+                  example: 1
+                episode_num:
+                  type: integer
+                  description: Episode number
+                  example: 1
+                title:
+                  type: string
+                  description: Episode title
+                  example: "Pilot"
+                stream_url:
+                  type: string
+                  description: Episode video URL
+                  example: "http://cdn.example.com/bb_s01e01.mp4"
+      responses:
+        '200':
+          description: Episode created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
 
   /?action=edit_episode:
-    post: {summary: Edit Episode, tags: [Episode API], operationId: editEpisode, parameters: [{$ref: '#/components/parameters/ApiKey'}, {name: action, in: query, schema: {type: string, enum: [edit_episode]}}], responses: {'200': {description: Episode updated}}}
+    post:
+      summary: Edit Episode
+      description: Modify episode details
+      tags: [Episode API]
+      operationId: editEpisode
+      parameters:
+        - $ref: '#/components/parameters/ApiKey'
+        - name: action
+          in: query
+          required: true
+          schema:
+            type: string
+            enum: [edit_episode]
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              required: [id]
+              properties:
+                id:
+                  type: integer
+                  example: 200
+                title:
+                  type: string
+                  example: "Pilot (HD)"
+                stream_url:
+                  type: string
+                  example: "http://cdn.example.com/bb_s01e01_hd.mp4"
+      responses:
+        '200':
+          description: Episode updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
 
   /?action=delete_episode:
-    post: {summary: Delete Episode, tags: [Episode API], operationId: deleteEpisode, parameters: [{$ref: '#/components/parameters/ApiKey'}, {name: action, in: query, schema: {type: string, enum: [delete_episode]}}], responses: {'200': {description: Episode deleted}}}
+    post:
+      summary: Delete Episode
+      description: Remove an episode
+      tags: [Episode API]
+      operationId: deleteEpisode
+      parameters:
+        - $ref: '#/components/parameters/ApiKey'
+        - name: action
+          in: query
+          required: true
+          schema:
+            type: string
+            enum: [delete_episode]
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              required: [id]
+              properties:
+                id:
+                  type: integer
+                  example: 200
+      responses:
+        '200':
+          description: Episode deleted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
 
   /?action=enable_episode:
-    post: {summary: Enable Episode, tags: [Episode API], operationId: enableEpisode, parameters: [{$ref: '#/components/parameters/ApiKey'}, {name: action, in: query, schema: {type: string, enum: [enable_episode]}}], responses: {'200': {description: Episode enabled}}}
+    post:
+      summary: Enable Episode
+      description: Activate an episode
+      tags: [Episode API]
+      operationId: enableEpisode
+      parameters:
+        - $ref: '#/components/parameters/ApiKey'
+        - name: action
+          in: query
+          required: true
+          schema:
+            type: string
+            enum: [enable_episode]
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              required: [id]
+              properties:
+                id:
+                  type: integer
+                  example: 200
+      responses:
+        '200':
+          description: Episode enabled
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
 
   /?action=disable_episode:
-    post: {summary: Disable Episode, tags: [Episode API], operationId: disableEpisode, parameters: [{$ref: '#/components/parameters/ApiKey'}, {name: action, in: query, schema: {type: string, enum: [disable_episode]}}], responses: {'200': {description: Episode disabled}}}
+    post:
+      summary: Disable Episode
+      description: Deactivate an episode
+      tags: [Episode API]
+      operationId: disableEpisode
+      parameters:
+        - $ref: '#/components/parameters/ApiKey'
+        - name: action
+          in: query
+          required: true
+          schema:
+            type: string
+            enum: [disable_episode]
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              required: [id]
+              properties:
+                id:
+                  type: integer
+                  example: 200
+      responses:
+        '200':
+          description: Episode disabled
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
 
   /?action=get_episode:
-    get: {summary: Get Episode Details, tags: [Episode API], operationId: getEpisode, parameters: [{$ref: '#/components/parameters/ApiKey'}, {name: action, in: query, schema: {type: string, enum: [get_episode]}}], responses: {'200': {description: Episode details}}}
+    get:
+      summary: Get Episode Details
+      description: Retrieve episode information
+      tags: [Episode API]
+      operationId: getEpisode
+      parameters:
+        - $ref: '#/components/parameters/ApiKey'
+        - name: action
+          in: query
+          required: true
+          schema:
+            type: string
+            enum: [get_episode]
+        - name: id
+          in: query
+          required: true
+          schema:
+            type: integer
+          example: 200
+      responses:
+        '200':
+          description: Episode details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
 
   # Server API
   /?action=install_server:
-    post: {summary: Install New Server, tags: [Server API], operationId: installServer, parameters: [{$ref: '#/components/parameters/ApiKey'}, {name: action, in: query, schema: {type: string, enum: [install_server]}}], responses: {'200': {description: Server installed}}}
+    post:
+      summary: Install New Server
+      description: |
+        Add a new streaming server to your panel for load distribution.
+        
+        **Example:**
+        ```bash
+        curl -X POST "http://your-server.com/cSbuFLhp/?api_key=API-KEY&action=install_server" \
+          -d "server_name=Server USA" \
+          -d "server_ip=192.168.1.50" \
+          -d "http_port=8000" \
+          -d "https_port=8443"
+        ```
+      tags: [Server API]
+      operationId: installServer
+      parameters:
+        - $ref: '#/components/parameters/ApiKey'
+        - name: action
+          in: query
+          required: true
+          schema:
+            type: string
+            enum: [install_server]
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              required: [server_name, server_ip]
+              properties:
+                server_name:
+                  type: string
+                  description: Friendly name for the server
+                  example: "Server USA East"
+                server_ip:
+                  type: string
+                  description: Server IP address or domain
+                  example: "192.168.1.50"
+                http_port:
+                  type: integer
+                  description: HTTP port for streaming
+                  default: 8000
+                  example: 8000
+                https_port:
+                  type: integer
+                  description: HTTPS port for streaming
+                  default: 8443
+                  example: 8443
+                rtmp_port:
+                  type: integer
+                  description: RTMP port for streaming
+                  default: 1935
+                  example: 1935
+      responses:
+        '200':
+          description: Server installed successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
 
   /?action=edit_server:
-    post: {summary: Edit Server Settings, tags: [Server API], operationId: editServer, parameters: [{$ref: '#/components/parameters/ApiKey'}, {name: action, in: query, schema: {type: string, enum: [edit_server]}}], responses: {'200': {description: Server updated}}}
+    post:
+      summary: Edit Server Settings
+      description: |
+        Modify configuration of an existing server.
+        
+        **Example:**
+        ```bash
+        curl -X POST "http://your-server.com/cSbuFLhp/?api_key=API-KEY&action=edit_server" \
+          -d "id=1" \
+          -d "server_name=Server USA Updated" \
+          -d "http_port=9000"
+        ```
+      tags: [Server API]
+      operationId: editServer
+      parameters:
+        - $ref: '#/components/parameters/ApiKey'
+        - name: action
+          in: query
+          required: true
+          schema:
+            type: string
+            enum: [edit_server]
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              required: [id]
+              properties:
+                id:
+                  type: integer
+                  description: Server ID to edit
+                  example: 1
+                server_name:
+                  type: string
+                  description: New server name
+                  example: "Server USA Updated"
+                server_ip:
+                  type: string
+                  description: New server IP
+                  example: "192.168.1.51"
+                http_port:
+                  type: integer
+                  description: New HTTP port
+                  example: 9000
+                https_port:
+                  type: integer
+                  description: New HTTPS port
+                  example: 9443
+                rtmp_port:
+                  type: integer
+                  description: New RTMP port
+                  example: 1935
+      responses:
+        '200':
+          description: Server updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
 
   /?action=delete_server:
-    post: {summary: Remove Server, tags: [Server API], operationId: deleteServer, parameters: [{$ref: '#/components/parameters/ApiKey'}, {name: action, in: query, schema: {type: string, enum: [delete_server]}}], responses: {'200': {description: Server removed}}}
+    post:
+      summary: Remove Server
+      description: |
+        Delete a server from your panel.
+        
+        **Example:**
+        ```bash
+        curl -X POST "http://your-server.com/cSbuFLhp/?api_key=API-KEY&action=delete_server" \
+          -d "id=1"
+        ```
+      tags: [Server API]
+      operationId: deleteServer
+      parameters:
+        - $ref: '#/components/parameters/ApiKey'
+        - name: action
+          in: query
+          required: true
+          schema:
+            type: string
+            enum: [delete_server]
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              required: [id]
+              properties:
+                id:
+                  type: integer
+                  description: Server ID to delete
+                  example: 1
+      responses:
+        '200':
+          description: Server removed successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
 
   /?action=restart_server:
-    post: {summary: Restart Server Services, tags: [Server API], operationId: restartServer, parameters: [{$ref: '#/components/parameters/ApiKey'}, {name: action, in: query, schema: {type: string, enum: [restart_server]}}], responses: {'200': {description: Server restarting}}}
+    post:
+      summary: Restart Server Services
+      description: |
+        Restart streaming services on a specific server.
+        
+        **Example:**
+        ```bash
+        curl -X POST "http://your-server.com/cSbuFLhp/?api_key=API-KEY&action=restart_server" \
+          -d "server_id=1"
+        ```
+      tags: [Server API]
+      operationId: restartServer
+      parameters:
+        - $ref: '#/components/parameters/ApiKey'
+        - name: action
+          in: query
+          required: true
+          schema:
+            type: string
+            enum: [restart_server]
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              required: [server_id]
+              properties:
+                server_id:
+                  type: integer
+                  description: Server ID to restart
+                  example: 1
+      responses:
+        '200':
+          description: Server services restarting
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
 
   /?action=get_server_info:
-    get: {summary: Get Server Information, tags: [Server API], operationId: getServerInfo, parameters: [{$ref: '#/components/parameters/ApiKey'}, {name: action, in: query, schema: {type: string, enum: [get_server_info]}}], responses: {'200': {description: Server info}}}
+    get:
+      summary: Get Server Information
+      description: |
+        Retrieve detailed information about a specific server.
+        
+        **Example:**
+        ```bash
+        curl "http://your-server.com/cSbuFLhp/?api_key=API-KEY&action=get_server_info&server_id=1"
+        ```
+      tags: [Server API]
+      operationId: getServerInfo
+      parameters:
+        - $ref: '#/components/parameters/ApiKey'
+        - name: action
+          in: query
+          required: true
+          schema:
+            type: string
+            enum: [get_server_info]
+        - name: server_id
+          in: query
+          required: true
+          schema:
+            type: integer
+          description: Server ID
+          example: 1
+      responses:
+        '200':
+          description: Server information retrieved
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/SuccessResponse'
+                  - type: object
+                    properties:
+                      data:
+                        type: object
+                        properties:
+                          server_id:
+                            type: integer
+                          server_name:
+                            type: string
+                          server_ip:
+                            type: string
+                          http_port:
+                            type: integer
+                          status:
+                            type: string
 
   /?action=get_server_stats:
-    get: {summary: Get Server Statistics, tags: [Server API], operationId: getServerStats, parameters: [{$ref: '#/components/parameters/ApiKey'}, {name: action, in: query, schema: {type: string, enum: [get_server_stats]}}], responses: {'200': {description: Server stats}}}
+    get:
+      summary: Get Server Statistics
+      description: |
+        Retrieve usage statistics for a specific server.
+        
+        **Example:**
+        ```bash
+        curl "http://your-server.com/cSbuFLhp/?api_key=API-KEY&action=get_server_stats&server_id=1"
+        ```
+      tags: [Server API]
+      operationId: getServerStats
+      parameters:
+        - $ref: '#/components/parameters/ApiKey'
+        - name: action
+          in: query
+          required: true
+          schema:
+            type: string
+            enum: [get_server_stats]
+        - name: server_id
+          in: query
+          required: true
+          schema:
+            type: integer
+          description: Server ID
+          example: 1
+      responses:
+        '200':
+          description: Server statistics retrieved
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
 
   /?action=install_load_balancer:
-    post: {summary: Install Load Balancer, tags: [Server API], operationId: installLoadBalancer, parameters: [{$ref: '#/components/parameters/ApiKey'}, {name: action, in: query, schema: {type: string, enum: [install_load_balancer]}}], responses: {'200': {description: Load balancer installed}}}
+    post:
+      summary: Install Load Balancer
+      description: |
+        Add a load balancer to distribute traffic across servers.
+        
+        **Example:**
+        ```bash
+        curl -X POST "http://your-server.com/cSbuFLhp/?api_key=API-KEY&action=install_load_balancer" \
+          -d "name=LB-Primary" \
+          -d "server_ip=192.168.1.100"
+        ```
+      tags: [Server API]
+      operationId: installLoadBalancer
+      parameters:
+        - $ref: '#/components/parameters/ApiKey'
+        - name: action
+          in: query
+          required: true
+          schema:
+            type: string
+            enum: [install_load_balancer]
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              required: [name, server_ip]
+              properties:
+                name:
+                  type: string
+                  description: Load balancer name
+                  example: "LB-Primary"
+                server_ip:
+                  type: string
+                  description: Load balancer IP
+                  example: "192.168.1.100"
+                username:
+                  type: string
+                  description: SSH username
+                  example: "root"
+                password:
+                  type: string
+                  description: SSH password
+                  example: "secure_password"
+      responses:
+        '200':
+          description: Load balancer installed successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
 
   /?action=edit_load_balancer:
-    post: {summary: Edit Load Balancer, tags: [Server API], operationId: editLoadBalancer, parameters: [{$ref: '#/components/parameters/ApiKey'}, {name: action, in: query, schema: {type: string, enum: [edit_load_balancer]}}], responses: {'200': {description: Load balancer updated}}}
+    post:
+      summary: Edit Load Balancer
+      description: |
+        Modify load balancer configuration.
+        
+        **Example:**
+        ```bash
+        curl -X POST "http://your-server.com/cSbuFLhp/?api_key=API-KEY&action=edit_load_balancer" \
+          -d "id=1" \
+          -d "name=LB-Updated"
+        ```
+      tags: [Server API]
+      operationId: editLoadBalancer
+      parameters:
+        - $ref: '#/components/parameters/ApiKey'
+        - name: action
+          in: query
+          required: true
+          schema:
+            type: string
+            enum: [edit_load_balancer]
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              required: [id]
+              properties:
+                id:
+                  type: integer
+                  description: Load balancer ID
+                  example: 1
+                name:
+                  type: string
+                  description: New load balancer name
+                  example: "LB-Updated"
+                server_ip:
+                  type: string
+                  description: New IP address
+                  example: "192.168.1.101"
+      responses:
+        '200':
+          description: Load balancer updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+
 
   # Settings & System API
   /?action=get_settings:
-    get: {summary: Get Panel Settings, tags: [Settings & System], operationId: getSettings, parameters: [{$ref: '#/components/parameters/ApiKey'}, {name: action, in: query, schema: {type: string, enum: [get_settings]}}], responses: {'200': {description: Panel settings}}}
+    get:
+      summary: Get Panel Settings
+      description: |
+        Retrieve current panel configuration settings.
+        
+        **Example:**
+        ```bash
+        curl "http://your-server.com/cSbuFLhp/?api_key=API-KEY&action=get_settings"
+        ```
+      tags: [Settings & System]
+      operationId: getSettings
+      parameters:
+        - $ref: '#/components/parameters/ApiKey'
+        - name: action
+          in: query
+          required: true
+          schema:
+            type: string
+            enum: [get_settings]
+      responses:
+        '200':
+          description: Panel settings retrieved
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
 
   /?action=edit_settings:
-    post: {summary: Update Panel Settings, tags: [Settings & System], operationId: editSettings, parameters: [{$ref: '#/components/parameters/ApiKey'}, {name: action, in: query, schema: {type: string, enum: [edit_settings]}}], responses: {'200': {description: Settings updated}}}
+    post:
+      summary: Update Panel Settings
+      description: |
+        Modify panel configuration.
+        
+        **Example:**
+        ```bash
+        curl -X POST "http://your-server.com/cSbuFLhp/?api_key=API-KEY&action=edit_settings" \
+          -d "panel_name=My IPTV Panel" \
+          -d "default_timezone=UTC"
+        ```
+      tags: [Settings & System]
+      operationId: editSettings
+      parameters:
+        - $ref: '#/components/parameters/ApiKey'
+        - name: action
+          in: query
+          required: true
+          schema:
+            type: string
+            enum: [edit_settings]
+      requestBody:
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              properties:
+                panel_name:
+                  type: string
+                  description: Panel display name
+                  example: "My IPTV Panel"
+                default_timezone:
+                  type: string
+                  description: Default timezone
+                  example: "UTC"
+                allowed_ips:
+                  type: string
+                  description: Comma-separated IP whitelist
+                  example: "192.168.1.0/24,10.0.0.1"
+      responses:
+        '200':
+          description: Settings updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
 
   /?action=reload_nginx:
-    post: {summary: Reload Nginx Configuration, tags: [Settings & System], operationId: reloadNginx, parameters: [{$ref: '#/components/parameters/ApiKey'}, {name: action, in: query, schema: {type: string, enum: [reload_nginx]}}], responses: {'200': {description: Nginx reloaded}}}
+    post:
+      summary: Reload Nginx Configuration
+      description: |
+        Reload Nginx web server configuration without downtime.
+        
+        **Example:**
+        ```bash
+        curl -X POST "http://your-server.com/cSbuFLhp/?api_key=API-KEY&action=reload_nginx"
+        ```
+      tags: [Settings & System]
+      operationId: reloadNginx
+      parameters:
+        - $ref: '#/components/parameters/ApiKey'
+        - name: action
+          in: query
+          required: true
+          schema:
+            type: string
+            enum: [reload_nginx]
+      responses:
+        '200':
+          description: Nginx reloaded successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
 
   /?action=clear_cache:
-    post: {summary: Clear System Cache, tags: [Settings & System], operationId: clearCache, parameters: [{$ref: '#/components/parameters/ApiKey'}, {name: action, in: query, schema: {type: string, enum: [clear_cache]}}], responses: {'200': {description: Cache cleared}}}
+    post:
+      summary: Clear System Cache
+      description: |
+        Clear all system caches (Redis, file cache, etc).
+        
+        **Example:**
+        ```bash
+        curl -X POST "http://your-server.com/cSbuFLhp/?api_key=API-KEY&action=clear_cache"
+        ```
+      tags: [Settings & System]
+      operationId: clearCache
+      parameters:
+        - $ref: '#/components/parameters/ApiKey'
+        - name: action
+          in: query
+          required: true
+          schema:
+            type: string
+            enum: [clear_cache]
+      responses:
+        '200':
+          description: Cache cleared successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
 
   /?action=backup_database:
-    post: {summary: Backup Database, tags: [Settings & System], operationId: backupDatabase, parameters: [{$ref: '#/components/parameters/ApiKey'}, {name: action, in: query, schema: {type: string, enum: [backup_database]}}], responses: {'200': {description: Backup created}}}
+    post:
+      summary: Backup Database
+      description: |
+        Create a full database backup.
+        
+        **Example:**
+        ```bash
+        curl -X POST "http://your-server.com/cSbuFLhp/?api_key=API-KEY&action=backup_database"
+        ```
+      tags: [Settings & System]
+      operationId: backupDatabase
+      parameters:
+        - $ref: '#/components/parameters/ApiKey'
+        - name: action
+          in: query
+          required: true
+          schema:
+            type: string
+            enum: [backup_database]
+      responses:
+        '200':
+          description: Backup created successfully
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/SuccessResponse'
+                  - type: object
+                    properties:
+                      data:
+                        type: object
+                        properties:
+                          backup_file:
+                            type: string
+                            description: Backup filename
+                          backup_size:
+                            type: string
+                            description: Backup file size
 
   /?action=restore_database:
-    post: {summary: Restore Database, tags: [Settings & System], operationId: restoreDatabase, parameters: [{$ref: '#/components/parameters/ApiKey'}, {name: action, in: query, schema: {type: string, enum: [restore_database]}}], responses: {'200': {description: Database restored}}}
+    post:
+      summary: Restore Database
+      description: |
+        Restore database from backup file.
+        
+        **Example:**
+        ```bash
+        curl -X POST "http://your-server.com/cSbuFLhp/?api_key=API-KEY&action=restore_database" \
+          -d "backup_file=backup_2024_12_15.sql"
+        ```
+      tags: [Settings & System]
+      operationId: restoreDatabase
+      parameters:
+        - $ref: '#/components/parameters/ApiKey'
+        - name: action
+          in: query
+          required: true
+          schema:
+            type: string
+            enum: [restore_database]
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              required: [backup_file]
+              properties:
+                backup_file:
+                  type: string
+                  description: Backup filename to restore
+                  example: "backup_2024_12_15.sql"
+      responses:
+        '200':
+          description: Database restored successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
 
   /?action=get_categories:
-    get: {summary: Get All Categories, tags: [Settings & System], operationId: getCategories, parameters: [{$ref: '#/components/parameters/ApiKey'}, {name: action, in: query, schema: {type: string, enum: [get_categories]}}], responses: {'200': {description: Categories list}}}
+    get:
+      summary: Get All Categories
+      description: |
+        Retrieve list of all content categories.
+        
+        **Example:**
+        ```bash
+        curl "http://your-server.com/cSbuFLhp/?api_key=API-KEY&action=get_categories"
+        ```
+      tags: [Settings & System]
+      operationId: getCategories
+      parameters:
+        - $ref: '#/components/parameters/ApiKey'
+        - name: action
+          in: query
+          required: true
+          schema:
+            type: string
+            enum: [get_categories]
+      responses:
+        '200':
+          description: Categories list retrieved
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/SuccessResponse'
+                  - type: object
+                    properties:
+                      data:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            id:
+                              type: integer
+                            category_name:
+                              type: string
+                            parent_id:
+                              type: integer
 
   /?action=create_category:
-    post: {summary: Create Category, tags: [Settings & System], operationId: createCategory, parameters: [{$ref: '#/components/parameters/ApiKey'}, {name: action, in: query, schema: {type: string, enum: [create_category]}}], responses: {'200': {description: Category created}}}
+    post:
+      summary: Create Category
+      description: |
+        Add a new content category.
+        
+        **Example:**
+        ```bash
+        curl -X POST "http://your-server.com/cSbuFLhp/?api_key=API-KEY&action=create_category" \
+          -d "category_name=Action Movies" \
+          -d "category_type=vod" \
+          -d "parent_id=0"
+        ```
+      tags: [Settings & System]
+      operationId: createCategory
+      parameters:
+        - $ref: '#/components/parameters/ApiKey'
+        - name: action
+          in: query
+          required: true
+          schema:
+            type: string
+            enum: [create_category]
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              required: [category_name, category_type]
+              properties:
+                category_name:
+                  type: string
+                  description: Category name
+                  example: "Action Movies"
+                category_type:
+                  type: string
+                  description: Category type
+                  enum: [live, vod, series, radio]
+                  example: "vod"
+                parent_id:
+                  type: integer
+                  description: Parent category ID
+                  default: 0
+                  example: 0
+      responses:
+        '200':
+          description: Category created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
 
   /?action=edit_category:
-    post: {summary: Edit Category, tags: [Settings & System], operationId: editCategory, parameters: [{$ref: '#/components/parameters/ApiKey'}, {name: action, in: query, schema: {type: string, enum: [edit_category]}}], responses: {'200': {description: Category updated}}}
+    post:
+      summary: Edit Category
+      description: |
+        Modify category details.
+        
+        **Example:**
+        ```bash
+        curl -X POST "http://your-server.com/cSbuFLhp/?api_key=API-KEY&action=edit_category" \
+          -d "id=10" \
+          -d "category_name=Premium Action Movies"
+        ```
+      tags: [Settings & System]
+      operationId: editCategory
+      parameters:
+        - $ref: '#/components/parameters/ApiKey'
+        - name: action
+          in: query
+          required: true
+          schema:
+            type: string
+            enum: [edit_category]
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              required: [id]
+              properties:
+                id:
+                  type: integer
+                  description: Category ID
+                  example: 10
+                category_name:
+                  type: string
+                  description: New category name
+                  example: "Premium Action Movies"
+                parent_id:
+                  type: integer
+                  description: New parent category
+                  example: 0
+      responses:
+        '200':
+          description: Category updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
 
   /?action=delete_category:
-    post: {summary: Delete Category, tags: [Settings & System], operationId: deleteCategory, parameters: [{$ref: '#/components/parameters/ApiKey'}, {name: action, in: query, schema: {type: string, enum: [delete_category]}}], responses: {'200': {description: Category deleted}}}
+    post:
+      summary: Delete Category
+      description: |
+        Remove a category.
+        
+        **Example:**
+        ```bash
+        curl -X POST "http://your-server.com/cSbuFLhp/?api_key=API-KEY&action=delete_category" \
+          -d "id=10"
+        ```
+      tags: [Settings & System]
+      operationId: deleteCategory
+      parameters:
+        - $ref: '#/components/parameters/ApiKey'
+        - name: action
+          in: query
+          required: true
+          schema:
+            type: string
+            enum: [delete_category]
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              required: [id]
+              properties:
+                id:
+                  type: integer
+                  description: Category ID
+                  example: 10
+      responses:
+        '200':
+          description: Category deleted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
 
   /?action=get_bouquets:
-    get: {summary: Get All Bouquets/Packages, tags: [Settings & System], operationId: getBouquets, parameters: [{$ref: '#/components/parameters/ApiKey'}, {name: action, in: query, schema: {type: string, enum: [get_bouquets]}}], responses: {'200': {description: Bouquets list}}}
+    get:
+      summary: Get All Bouquets/Packages
+      description: |
+        Retrieve list of all subscription packages.
+        
+        **Example:**
+        ```bash
+        curl "http://your-server.com/cSbuFLhp/?api_key=API-KEY&action=get_bouquets"
+        ```
+      tags: [Settings & System]
+      operationId: getBouquets
+      parameters:
+        - $ref: '#/components/parameters/ApiKey'
+        - name: action
+          in: query
+          required: true
+          schema:
+            type: string
+            enum: [get_bouquets]
+      responses:
+        '200':
+          description: Bouquets list retrieved
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/SuccessResponse'
+                  - type: object
+                    properties:
+                      data:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            id:
+                              type: integer
+                            bouquet_name:
+                              type: string
+                            channels:
+                              type: array
+                              items:
+                                type: integer
 
   /?action=create_bouquet:
-    post: {summary: Create Bouquet, tags: [Settings & System], operationId: createBouquet, parameters: [{$ref: '#/components/parameters/ApiKey'}, {name: action, in: query, schema: {type: string, enum: [create_bouquet]}}], responses: {'200': {description: Bouquet created}}}
+    post:
+      summary: Create Bouquet
+      description: |
+        Add a new subscription package.
+        
+        **Example:**
+        ```bash
+        curl -X POST "http://your-server.com/cSbuFLhp/?api_key=API-KEY&action=create_bouquet" \
+          -d "bouquet_name=Premium Package" \
+          -d "bouquet_channels[]=1" \
+          -d "bouquet_channels[]=2" \
+          -d "bouquet_channels[]=3"
+        ```
+      tags: [Settings & System]
+      operationId: createBouquet
+      parameters:
+        - $ref: '#/components/parameters/ApiKey'
+        - name: action
+          in: query
+          required: true
+          schema:
+            type: string
+            enum: [create_bouquet]
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              required: [bouquet_name]
+              properties:
+                bouquet_name:
+                  type: string
+                  description: Package name
+                  example: "Premium Package"
+                bouquet_channels:
+                  type: array
+                  description: Array of channel/stream IDs
+                  items:
+                    type: integer
+                  example: [1, 2, 3, 10, 15]
+      responses:
+        '200':
+          description: Bouquet created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
 
   /?action=edit_bouquet:
-    post: {summary: Edit Bouquet, tags: [Settings & System], operationId: editBouquet, parameters: [{$ref: '#/components/parameters/ApiKey'}, {name: action, in: query, schema: {type: string, enum: [edit_bouquet]}}], responses: {'200': {description: Bouquet updated}}}
+    post:
+      summary: Edit Bouquet
+      description: |
+        Modify bouquet/package details.
+        
+        **Example:**
+        ```bash
+        curl -X POST "http://your-server.com/cSbuFLhp/?api_key=API-KEY&action=edit_bouquet" \
+          -d "id=5" \
+          -d "bouquet_name=VIP Premium Package"
+        ```
+      tags: [Settings & System]
+      operationId: editBouquet
+      parameters:
+        - $ref: '#/components/parameters/ApiKey'
+        - name: action
+          in: query
+          required: true
+          schema:
+            type: string
+            enum: [edit_bouquet]
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              required: [id]
+              properties:
+                id:
+                  type: integer
+                  description: Bouquet ID
+                  example: 5
+                bouquet_name:
+                  type: string
+                  description: New package name
+                  example: "VIP Premium Package"
+                bouquet_channels:
+                  type: array
+                  description: Updated channel list
+                  items:
+                    type: integer
+                  example: [1, 2, 3, 5, 10, 15, 20]
+      responses:
+        '200':
+          description: Bouquet updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
 
   /?action=delete_bouquet:
-    post: {summary: Delete Bouquet, tags: [Settings & System], operationId: deleteBouquet, parameters: [{$ref: '#/components/parameters/ApiKey'}, {name: action, in: query, schema: {type: string, enum: [delete_bouquet]}}], responses: {'200': {description: Bouquet deleted}}}
+    post:
+      summary: Delete Bouquet
+      description: |
+        Remove a bouquet/package.
+        
+        **Example:**
+        ```bash
+        curl -X POST "http://your-server.com/cSbuFLhp/?api_key=API-KEY&action=delete_bouquet" \
+          -d "id=5"
+        ```
+      tags: [Settings & System]
+      operationId: deleteBouquet
+      parameters:
+        - $ref: '#/components/parameters/ApiKey'
+        - name: action
+          in: query
+          required: true
+          schema:
+            type: string
+            enum: [delete_bouquet]
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              required: [id]
+              properties:
+                id:
+                  type: integer
+                  description: Bouquet ID
+                  example: 5
+      responses:
+        '200':
+          description: Bouquet deleted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
 
 
 
