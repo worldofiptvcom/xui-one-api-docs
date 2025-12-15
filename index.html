@@ -372,9 +372,18 @@
             padding: 2rem;
         }
 
+        /* Swagger UI Light Theme Customization */
+        #swagger-ui div .scheme-container {
+            background-color: rgba(52,73,94,0.09);
+        }
+
         /* Swagger UI Dark Theme - Proper Implementation */
         [data-theme="dark"] .swagger-ui {
             filter: none !important;
+        }
+
+        [data-theme="dark"] .schemes div .servers div table tbody tr td {
+            background-color: transparent !important;
         }
 
         [data-theme="dark"] .swagger-ui .opblock-tag-section {
