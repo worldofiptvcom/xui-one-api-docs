@@ -2051,6 +2051,367 @@ paths:
 
 
   # ==================================================================================
+
+  # ==================================================================================
+  # CATEGORY 5.5: LINE API - M3U Subscription Management
+  # ==================================================================================
+
+  /?action=get_line:
+    get:
+      summary: Get Line Details
+      description: |
+        Retrieve detailed information about a specific M3U subscription line.
+        
+        **Example:**
+        ```bash
+        curl "http://your-server.com/cSbuFLhp/?api_key=API-KEY&action=get_line&line_id=123"
+        ```
+      tags: [Line API]
+      operationId: getLine
+      parameters:
+        - $ref: '#/components/parameters/ApiKey'
+        - name: action
+          in: query
+          required: true
+          schema:
+            type: string
+            enum: [get_line]
+        - name: line_id
+          in: query
+          required: true
+          schema:
+            type: integer
+          description: Line ID
+          example: 123
+      responses:
+        '200':
+          description: Line details retrieved
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+
+  /?action=create_line:
+    post:
+      summary: Create M3U Line
+      description: |
+        Create a new M3U subscription line for a customer.
+        
+        **Example:**
+        ```bash
+        curl -X POST "http://your-server.com/cSbuFLhp/?api_key=API-KEY&action=create_line" \
+          -d "username=customer123" \
+          -d "password=pass123" \
+          -d "exp_date=2025-12-31" \
+          -d "max_connections=1" \
+          -d "bouquets_selected[]=1"
+        ```
+      tags: [Line API]
+      operationId: createLine
+      parameters:
+        - $ref: '#/components/parameters/ApiKey'
+        - name: action
+          in: query
+          required: true
+          schema:
+            type: string
+            enum: [create_line]
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              required: [username, password]
+              properties:
+                username:
+                  type: string
+                  description: M3U username
+                  example: "customer123"
+                password:
+                  type: string
+                  description: M3U password
+                  example: "pass123"
+                exp_date:
+                  type: string
+                  description: Expiration date (YYYY-MM-DD)
+                  example: "2025-12-31"
+                max_connections:
+                  type: integer
+                  description: Maximum concurrent connections
+                  default: 1
+                  example: 1
+                bouquets_selected:
+                  type: array
+                  description: Array of bouquet/package IDs
+                  items:
+                    type: integer
+                  example: [1, 2]
+                admin_notes:
+                  type: string
+                  description: Admin notes
+                  example: "Premium customer"
+                is_trial:
+                  type: integer
+                  description: Trial account flag (0 or 1)
+                  enum: [0, 1]
+                  example: 0
+                allowed_ips:
+                  type: string
+                  description: Comma-separated list of allowed IPs
+                  example: "192.168.1.100,10.0.0.1"
+      responses:
+        '200':
+          description: Line created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+
+  /?action=edit_line:
+    post:
+      summary: Edit M3U Line
+      description: |
+        Modify an existing M3U subscription line.
+        
+        **Example:**
+        ```bash
+        curl -X POST "http://your-server.com/cSbuFLhp/?api_key=API-KEY&action=edit_line" \
+          -d "line_id=123" \
+          -d "exp_date=2026-06-30" \
+          -d "max_connections=2"
+        ```
+      tags: [Line API]
+      operationId: editLine
+      parameters:
+        - $ref: '#/components/parameters/ApiKey'
+        - name: action
+          in: query
+          required: true
+          schema:
+            type: string
+            enum: [edit_line]
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              required: [line_id]
+              properties:
+                line_id:
+                  type: integer
+                  description: Line ID to edit
+                  example: 123
+                username:
+                  type: string
+                  description: New username
+                  example: "customer123_updated"
+                password:
+                  type: string
+                  description: New password
+                  example: "newpass456"
+                exp_date:
+                  type: string
+                  description: New expiration date
+                  example: "2026-06-30"
+                max_connections:
+                  type: integer
+                  description: New connection limit
+                  example: 2
+                bouquets_selected:
+                  type: array
+                  items:
+                    type: integer
+                  example: [1, 2, 3]
+                admin_notes:
+                  type: string
+                  example: "VIP customer"
+                allowed_ips:
+                  type: string
+                  example: "192.168.1.100"
+      responses:
+        '200':
+          description: Line updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+
+  /?action=delete_line:
+    post:
+      summary: Delete M3U Line
+      description: |
+        Permanently remove an M3U subscription line.
+        
+        **Example:**
+        ```bash
+        curl -X POST "http://your-server.com/cSbuFLhp/?api_key=API-KEY&action=delete_line" \
+          -d "line_id=123"
+        ```
+      tags: [Line API]
+      operationId: deleteLine
+      parameters:
+        - $ref: '#/components/parameters/ApiKey'
+        - name: action
+          in: query
+          required: true
+          schema:
+            type: string
+            enum: [delete_line]
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              required: [line_id]
+              properties:
+                line_id:
+                  type: integer
+                  description: Line ID to delete
+                  example: 123
+      responses:
+        '200':
+          description: Line deleted successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+
+  /?action=enable_line:
+    post:
+      summary: Enable M3U Line
+      description: Activate a disabled line
+      tags: [Line API]
+      operationId: enableLine
+      parameters:
+        - $ref: '#/components/parameters/ApiKey'
+        - name: action
+          in: query
+          required: true
+          schema:
+            type: string
+            enum: [enable_line]
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              required: [line_id]
+              properties:
+                line_id:
+                  type: integer
+                  example: 123
+      responses:
+        '200':
+          description: Line enabled
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+
+  /?action=disable_line:
+    post:
+      summary: Disable M3U Line
+      description: Deactivate a line without deleting it
+      tags: [Line API]
+      operationId: disableLine
+      parameters:
+        - $ref: '#/components/parameters/ApiKey'
+        - name: action
+          in: query
+          required: true
+          schema:
+            type: string
+            enum: [disable_line]
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              required: [line_id]
+              properties:
+                line_id:
+                  type: integer
+                  example: 123
+      responses:
+        '200':
+          description: Line disabled
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+
+  /?action=ban_line:
+    post:
+      summary: Ban M3U Line
+      description: Ban a line from service
+      tags: [Line API]
+      operationId: banLine
+      parameters:
+        - $ref: '#/components/parameters/ApiKey'
+        - name: action
+          in: query
+          required: true
+          schema:
+            type: string
+            enum: [ban_line]
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              required: [line_id]
+              properties:
+                line_id:
+                  type: integer
+                  example: 123
+      responses:
+        '200':
+          description: Line banned
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+
+  /?action=unban_line:
+    post:
+      summary: Unban M3U Line
+      description: Remove ban from a line
+      tags: [Line API]
+      operationId: unbanLine
+      parameters:
+        - $ref: '#/components/parameters/ApiKey'
+        - name: action
+          in: query
+          required: true
+          schema:
+            type: string
+            enum: [unban_line]
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              required: [line_id]
+              properties:
+                line_id:
+                  type: integer
+                  example: 123
+      responses:
+        '200':
+          description: Line unbanned
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+
+  # ==================================================================================
   # CATEGORY 6: MAG API - MAG Device Management
   # ==================================================================================
 
@@ -2916,6 +3277,11 @@ paths:
       description: |
         Add a new live TV stream to your panel.
         
+        **Validation:** Requires ONE OF:
+        - `stream_display_name` - For manual stream entry
+        - `review=1` - For review/preview mode
+        - M3U file upload - For bulk import
+        
         **Example:**
         ```bash
         curl -X POST "http://your-server.com/cSbuFLhp/?api_key=API-KEY&action=create_stream" \
@@ -2939,11 +3305,10 @@ paths:
           application/x-www-form-urlencoded:
             schema:
               type: object
-              required: [stream_display_name, stream_source]
               properties:
                 stream_display_name:
                   type: string
-                  description: Display name for the stream
+                  description: Display name for the stream (required unless review=1 or uploading M3U)
                   example: "CNN HD"
                 stream_source:
                   type: string
@@ -2961,6 +3326,25 @@ paths:
                   type: string
                   description: Admin notes
                   example: "Main news channel"
+                review:
+                  type: integer
+                  description: Review mode flag (0 or 1)
+                  enum: [0, 1]
+                  example: 0
+                direct_source:
+                  type: integer
+                  description: Use direct source without transcoding (0 or 1)
+                  enum: [0, 1]
+                  example: 1
+                tv_archive:
+                  type: integer
+                  description: Enable TV archive/catchup (0 or 1)
+                  enum: [0, 1]
+                  example: 0
+                tv_archive_duration:
+                  type: integer
+                  description: Archive duration in days
+                  example: 7
       responses:
         '200':
           description: Stream created successfully
@@ -4046,14 +4430,16 @@ paths:
       description: |
         Add a new episode to a TV series.
         
+        **IMPORTANT:** Parameter names are `series`, `season_num`, and `episode` (not series_id or episode_num).
+        
         **Example:**
         ```bash
         curl -X POST "http://your-server.com/cSbuFLhp/?api_key=API-KEY&action=create_episode" \
-          -d "series_id=50" \
+          -d "series=50" \
           -d "season_num=1" \
-          -d "episode_num=1" \
+          -d "episode=1" \
           -d "title=Pilot" \
-          -d "stream_url=http://cdn.example.com/bb_s01e01.mp4"
+          -d "stream_source=http://cdn.example.com/bb_s01e01.mp4"
         ```
       tags: [Episode API]
       operationId: createEpisode
@@ -4071,31 +4457,48 @@ paths:
           application/x-www-form-urlencoded:
             schema:
               type: object
-              required: [series_id, season_num, episode_num, stream_url]
+              required: [series, season_num, episode]
               properties:
-                series_id:
+                series:
                   type: integer
-                  description: Parent series ID
+                  description: Parent series ID (parameter name is 'series', not 'series_id')
                   example: 50
                 season_num:
                   type: integer
-                  description: Season number
+                  description: Season number (must be numeric)
                   example: 1
-                episode_num:
+                episode:
                   type: integer
-                  description: Episode number
+                  description: Episode number (parameter name is 'episode', not 'episode_num')
                   example: 1
                 title:
                   type: string
                   description: Episode title
                   example: "Pilot"
-                stream_url:
+                stream_source:
                   type: string
-                  description: Episode video URL
+                  description: Episode video URL (parameter name is 'stream_source', not 'stream_url')
                   example: "http://cdn.example.com/bb_s01e01.mp4"
+                direct_source:
+                  type: integer
+                  description: Use direct source without transcoding (0 or 1)
+                  enum: [0, 1]
+                  example: 1
+                transcode_profile_id:
+                  type: integer
+                  description: Transcode profile to use
+                  example: 1
+                plot:
+                  type: string
+                  description: Episode plot/description
+                  example: "The first episode introduces the main characters."
+                duration:
+                  type: string
+                  description: Episode duration (e.g., '00:45:00')
+                  example: "00:45:00"
       responses:
         '200':
-          description: Episode created
+          description: Episode created successfully
           content:
             application/json:
               schema:
@@ -4272,16 +4675,24 @@ paths:
     post:
       summary: Install New Server
       description: |
-        Add a new streaming server to your panel for load distribution.
+        Install XUI.ONE on a remote server via SSH. The system will automatically install
+        and configure the streaming server software.
+        
+        **IMPORTANT:** This endpoint requires SSH access to the target server.
         
         **Example:**
         ```bash
         curl -X POST "http://your-server.com/cSbuFLhp/?api_key=API-KEY&action=install_server" \
           -d "server_name=Server USA" \
           -d "server_ip=192.168.1.50" \
-          -d "http_port=8000" \
-          -d "https_port=8443"
+          -d "ssh_port=22" \
+          -d "root_username=root" \
+          -d "root_password=yourpassword" \
+          -d "update_sysctl=1"
         ```
+        
+        **Note:** The `type` parameter is automatically set to `0` for streaming servers.
+        For load balancers, use the `install_proxy` action instead.
       tags: [Server API]
       operationId: installServer
       parameters:
@@ -4298,34 +4709,115 @@ paths:
           application/x-www-form-urlencoded:
             schema:
               type: object
-              required: [server_name, server_ip]
+              required: [ssh_port, root_password]
               properties:
                 server_name:
                   type: string
-                  description: Friendly name for the server
+                  description: Friendly name for the server (optional but recommended)
                   example: "Server USA East"
                 server_ip:
                   type: string
-                  description: Server IP address or domain
+                  description: Server IP address or domain (optional but recommended)
                   example: "192.168.1.50"
-                http_port:
+                ssh_port:
                   type: integer
-                  description: HTTP port for streaming
-                  default: 8000
+                  description: SSH port number (REQUIRED)
+                  default: 22
+                  example: 22
+                root_username:
+                  type: string
+                  description: SSH username for server access
+                  default: "root"
+                  example: "root"
+                root_password:
+                  type: string
+                  description: SSH password for server access (REQUIRED)
+                  example: "yourpassword"
+                  format: password
+                http_broadcast_port:
+                  type: integer
+                  description: HTTP port for streaming (set during installation)
                   example: 8000
-                https_port:
+                https_broadcast_port:
                   type: integer
-                  description: HTTPS port for streaming
-                  default: 8443
+                  description: HTTPS port for streaming (set during installation)
                   example: 8443
-                rtmp_port:
+                update_sysctl:
                   type: integer
-                  description: RTMP port for streaming
-                  default: 1935
-                  example: 1935
+                  description: Update system settings during installation (0=No, 1=Yes)
+                  enum: [0, 1]
+                  default: 0
+                  example: 1
       responses:
         '200':
-          description: Server installed successfully
+          description: Server installation initiated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+
+  /?action=install_proxy:
+    post:
+      summary: Install Load Balancer
+      description: |
+        Install a load balancer (proxy) server for distributing traffic across streaming servers.
+        
+        **IMPORTANT:** This endpoint requires SSH access to the target server.
+        The `type` parameter is automatically set to `1` for load balancers.
+        
+        **Example:**
+        ```bash
+        curl -X POST "http://your-server.com/cSbuFLhp/?api_key=API-KEY&action=install_proxy" \
+          -d "server_name=Load Balancer EU" \
+          -d "server_ip=192.168.1.100" \
+          -d "ssh_port=22" \
+          -d "root_username=root" \
+          -d "root_password=yourpassword"
+        ```
+      tags: [Server API]
+      operationId: installProxy
+      parameters:
+        - $ref: '#/components/parameters/ApiKey'
+        - name: action
+          in: query
+          required: true
+          schema:
+            type: string
+            enum: [install_proxy]
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              required: [ssh_port, root_password]
+              properties:
+                server_name:
+                  type: string
+                  description: Friendly name for the load balancer
+                  example: "Load Balancer EU"
+                server_ip:
+                  type: string
+                  description: Server IP address or domain
+                  example: "192.168.1.100"
+                ssh_port:
+                  type: integer
+                  description: SSH port number (REQUIRED)
+                  default: 22
+                  example: 22
+                root_username:
+                  type: string
+                  description: SSH username
+                  default: "root"
+                  example: "root"
+                root_password:
+                  type: string
+                  description: SSH password (REQUIRED)
+                  format: password
+                  example: "yourpassword"
+      responses:
+        '200':
+          description: Load balancer installation initiated
           content:
             application/json:
               schema:
@@ -4335,14 +4827,14 @@ paths:
     post:
       summary: Edit Server Settings
       description: |
-        Modify configuration of an existing server.
+        Modify configuration of an existing streaming server.
         
         **Example:**
         ```bash
         curl -X POST "http://your-server.com/cSbuFLhp/?api_key=API-KEY&action=edit_server" \
           -d "id=1" \
           -d "server_name=Server USA Updated" \
-          -d "http_port=9000"
+          -d "http_broadcast_port=9000"
         ```
       tags: [Server API]
       operationId: editServer
@@ -4372,12 +4864,31 @@ paths:
                   example: "Server USA Updated"
                 server_ip:
                   type: string
-                  description: New server IP
+                  description: New server IP address
                   example: "192.168.1.51"
-                http_port:
+                http_broadcast_port:
                   type: integer
-                  description: New HTTP port
+                  description: HTTP broadcast port
                   example: 9000
+                https_broadcast_port:
+                  type: integer
+                  description: HTTPS broadcast port
+                  example: 9443
+                http_ports_add:
+                  type: string
+                  description: Additional HTTP ports (comma-separated)
+                  example: "8001,8002,8003"
+                https_ports_add:
+                  type: string
+                  description: Additional HTTPS ports (comma-separated)
+                  example: "8444,8445"
+      responses:
+        '200':
+          description: Server updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
                 https_port:
                   type: integer
                   description: New HTTPS port
