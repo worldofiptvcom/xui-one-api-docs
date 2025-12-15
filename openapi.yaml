@@ -1188,7 +1188,137 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/SuccessResponse'
+                allOf:
+                  - $ref: '#/components/schemas/SuccessResponse'
+                  - type: object
+                    properties:
+                      data:
+                        type: object
+                        properties:
+                          id:
+                            type: string
+                          member_id:
+                            type: string
+                          username:
+                            type: string
+                          password:
+                            type: string
+                          last_ip:
+                            type: string
+                          exp_date:
+                            type: string
+                            nullable: true
+                          admin_enabled:
+                            type: string
+                          enabled:
+                            type: string
+                          admin_notes:
+                            type: string
+                            nullable: true
+                          reseller_notes:
+                            type: string
+                            nullable: true
+                          bouquet:
+                            type: string
+                            description: JSON array string of bouquet IDs
+                          allowed_outputs:
+                            type: string
+                            description: JSON array string of allowed outputs
+                          max_connections:
+                            type: string
+                          is_restreamer:
+                            type: string
+                          is_trial:
+                            type: string
+                          is_mag:
+                            type: string
+                          is_e2:
+                            type: string
+                          is_stalker:
+                            type: string
+                          is_isplock:
+                            type: string
+                          allowed_ips:
+                            type: string
+                            description: JSON array string
+                          allowed_ua:
+                            type: string
+                            description: JSON array string
+                          created_at:
+                            type: string
+                          pair_id:
+                            type: string
+                            nullable: true
+                          force_server_id:
+                            type: string
+                          as_number:
+                            type: string
+                          isp_desc:
+                            type: string
+                          forced_country:
+                            type: string
+                            nullable: true
+                          bypass_ua:
+                            type: string
+                          play_token:
+                            type: string
+                            nullable: true
+                          last_expiration_video:
+                            type: string
+                            nullable: true
+                          package_id:
+                            type: string
+                            nullable: true
+                          access_token:
+                            type: string
+                            nullable: true
+                          contact:
+                            type: string
+                            nullable: true
+                          last_activity:
+                            type: string
+                          last_activity_array:
+                            type: string
+                            description: JSON object string
+                          updated:
+                            type: string
+                        example:
+                          id: "1"
+                          member_id: "1"
+                          username: "jhgsdf22"
+                          password: "EfuBzGCmeg"
+                          last_ip: "109.236.80.64"
+                          exp_date: null
+                          admin_enabled: "1"
+                          enabled: "1"
+                          admin_notes: null
+                          reseller_notes: "WOI User: jhgsdf22\nSkyFull - 250 Euro/month\nAdult - 180 Euro/month\n\n430 Euro/month"
+                          bouquet: "[1,2,3,4]"
+                          allowed_outputs: "[1,2,3]"
+                          max_connections: "180"
+                          is_restreamer: "1"
+                          is_trial: "0"
+                          is_mag: "0"
+                          is_e2: "0"
+                          is_stalker: "0"
+                          is_isplock: "0"
+                          allowed_ips: "[]"
+                          allowed_ua: "[]"
+                          created_at: "1756987580"
+                          pair_id: null
+                          force_server_id: "0"
+                          as_number: "49981"
+                          isp_desc: "WorldStream B.V."
+                          forced_country: null
+                          bypass_ua: "0"
+                          play_token: null
+                          last_expiration_video: null
+                          package_id: null
+                          access_token: null
+                          contact: null
+                          last_activity: "469833"
+                          last_activity_array: "{\"date_end\":1765801621,\"stream_id\":204}"
+                          updated: "2025-12-15 13:28:01"
 
   /?action=get_lines:
     get:
@@ -1399,6 +1529,63 @@ paths:
                   type: string
                   description: Force country code (e.g., US, UK, DE)
                   example: "US"
+                allowed_outputs:
+                  type: string
+                  description: Allowed output formats (JSON array string)
+                  example: "[1,2,3]"
+                is_mag:
+                  type: integer
+                  description: MAG device flag (0 or 1)
+                  enum: [0, 1]
+                  default: 0
+                is_e2:
+                  type: integer
+                  description: Enigma2 device flag (0 or 1)
+                  enum: [0, 1]
+                  default: 0
+                is_stalker:
+                  type: integer
+                  description: Stalker portal flag (0 or 1)
+                  enum: [0, 1]
+                  default: 0
+                is_isplock:
+                  type: integer
+                  description: ISP lock flag (0 or 1)
+                  enum: [0, 1]
+                  default: 0
+                allowed_ua:
+                  type: string
+                  description: Allowed user agents (JSON array string)
+                  example: "[]"
+                pair_id:
+                  type: integer
+                  description: Paired device ID
+                  nullable: true
+                force_server_id:
+                  type: integer
+                  description: Force specific server ID
+                  default: 0
+                bypass_ua:
+                  type: integer
+                  description: Bypass user agent check (0 or 1)
+                  enum: [0, 1]
+                  default: 0
+                play_token:
+                  type: string
+                  description: Custom play token
+                  nullable: true
+                package_id:
+                  type: integer
+                  description: Package/bouquet ID
+                  nullable: true
+                access_token:
+                  type: string
+                  description: Access token for authentication
+                  nullable: true
+                contact:
+                  type: string
+                  description: Contact information
+                  nullable: true
       responses:
         '200':
           description: Line created successfully
